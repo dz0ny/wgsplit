@@ -30,6 +30,7 @@ struct MenuContent: View {
         if let status = model.status {
             Text(model.healthDescription)
             Button(status.running ? "Stop" : "Start") { model.toggleEnabled() }
+                .disabled(model.busy)
             Divider()
             if status.tunnels.isEmpty {
                 Text("No tunnels imported")

@@ -13,6 +13,7 @@ public enum ApplyError: Error, Equatable {
 
 public protocol SingBoxRunning: AnyObject, Sendable {
     var isRunning: Bool { get }
+    var processIdentifier: Int32 { get }
     func terminate()
 }
 
@@ -47,6 +48,10 @@ public final class Supervisor: @unchecked Sendable {
     }
 
     public var isRunning: Bool { handle?.isRunning ?? false }
+
+    /// Exposed so the daemon's signal handler can kill the child directly:
+    /// only async-signal-safe calls are allowed in that context.
+    public var currentPID: Int32? { handle.map(\.processIdentifier) }
 
     public var health: Health {
         guard isRunning else { return .stopped }

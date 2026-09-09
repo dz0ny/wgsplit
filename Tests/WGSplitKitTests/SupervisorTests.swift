@@ -5,6 +5,7 @@ final class FakeHandle: SingBoxRunning, @unchecked Sendable {
     var alive = true
     var terminated = false
     var isRunning: Bool { alive }
+    var processIdentifier: Int32 { 4242 }
     func terminate() { terminated = true; alive = false }
 }
 

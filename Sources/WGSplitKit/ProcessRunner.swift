@@ -4,6 +4,7 @@ public final class ProcessHandle: SingBoxRunning, @unchecked Sendable {
     private let process: Process
     init(process: Process) { self.process = process }
     public var isRunning: Bool { process.isRunning }
+    public var processIdentifier: Int32 { process.processIdentifier }
     public func terminate() {
         guard process.isRunning else { return }
         process.terminate()

@@ -9,6 +9,10 @@ final class AppModel: ObservableObject {
     private let client = ControlClient()
 
     @Published var startsAtLogin = LoginItem.isEnabled
+    /// Applying a change can take 10s on the daemon side (5s settle, plus a
+    /// 5s rollback restart if it fails), so requests must never run on the
+    /// main actor or the menu freezes for the duration.
+    @Published var busy = false
 
     var isRunning: Bool { status?.running ?? false }
 
@@ -23,6 +27,7 @@ final class AppModel: ObservableObject {
     }
 
     var healthDescription: String {
+        if busy { return "Working…" }
         switch status?.health ?? .stopped {
         case .stopped: return "Stopped"
         case .running: return "Connected — no traffic yet"
@@ -57,17 +62,26 @@ final class AppModel: ObservableObject {
     }
 
     private func send(_ request: ControlRequest) {
-        do {
-            switch try client.send(request) {
-            case .status(let s):
-                status = s
-                errorMessage = s.lastError
-            case .failure(let m):
-                errorMessage = m
+        busy = true
+        let client = self.client
+        Task {
+            let outcome = await Task.detached { () -> Result<ControlResponse, Error> in
+                do { return .success(try client.send(request)) }
+                catch { return .failure(error) }
+            }.value
+
+            switch outcome {
+            case .success(.status(let s)):
+                self.status = s
+                self.errorMessage = s.lastError
+            case .success(.failure(let m)):
+                self.errorMessage = m
+            case .failure:
+                self.status = nil
+                self.errorMessage =
+                    "Daemon unavailable. Run Scripts/install-daemon.sh with sudo."
             }
-        } catch {
-            status = nil
-            errorMessage = "Daemon unavailable. Run Scripts/install-daemon.sh with sudo."
+            self.busy = false
         }
     }
 }
