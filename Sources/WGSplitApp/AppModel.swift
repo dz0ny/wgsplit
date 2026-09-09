@@ -48,6 +48,19 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// True when the daemon has never answered, i.e. it probably is not installed.
+    var needsHelper: Bool { status == nil }
+
+    func installHelper() {
+        busy = true
+        Task {
+            let failure = await Task.detached { DaemonInstaller.install() }.value
+            self.errorMessage = failure?.message
+            self.busy = false
+            self.refresh()
+        }
+    }
+
     func toggleStartAtLogin() {
         if let problem = LoginItem.setEnabled(!startsAtLogin) {
             errorMessage = problem
@@ -95,7 +108,7 @@ final class AppModel: ObservableObject {
             case .failure:
                 self.status = nil
                 self.errorMessage =
-                    "Daemon unavailable. Run Scripts/install-daemon.sh with sudo."
+                    "Daemon not installed — choose Install Helper below."
             }
             self.busy = false
         }

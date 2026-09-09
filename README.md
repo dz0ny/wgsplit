@@ -12,10 +12,26 @@ instead.
 ## Install
 
 ```bash
-./Scripts/vendor-singbox.sh       # pinned sing-box 1.14.0 into Resources/
-swift build -c release
-sudo ./Scripts/install-daemon.sh  # one-time root daemon install
-./Scripts/bundle.sh && open dist/WGSplit.app
+./Scripts/vendor-singbox.sh   # pinned sing-box 1.14.0 into Resources/
+./Scripts/bundle.sh
+open dist/WGSplit.app
+```
+
+The app bundle is self-contained. On first launch the menu offers
+**Install Helper…**, which elevates via `osascript` and asks for your password
+in the standard macOS dialog — no terminal needed. It copies `wgsplitd` and
+`sing-box` to root-owned `/Library/PrivilegedHelperTools/wgsplit/` and loads the
+LaunchDaemon. The daemon deliberately runs from that copy, never from inside the
+app bundle: root executing a binary in a user-writable location would be a
+privilege-escalation path.
+
+Move `WGSplit.app` to `/Applications` before installing if you want Start at
+Login to stick — `SMAppService` wants a stable location.
+
+For development, the same script still works from a checkout:
+
+```bash
+swift build -c release && sudo ./Scripts/install-daemon.sh
 ```
 
 ## Use

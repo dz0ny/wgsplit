@@ -54,6 +54,12 @@ struct MenuContent: View {
             Text(model.errorMessage ?? "Connecting…")
         }
 
+        if model.needsHelper {
+            Divider()
+            Button("Install Helper…") { model.installHelper() }
+                .disabled(model.busy)
+        }
+
         Divider()
         Button("Edit Domains…") {
             NSApp.activate(ignoringOtherApps: true)
