@@ -7,6 +7,19 @@ final class AppModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let client = ControlClient()
+    private var poll: Timer?
+
+    init() {
+        // .onAppear is unreliable for NSMenu-backed MenuBarExtra items, and the
+        // daemon can be briefly unreachable while it restarts. Polling keeps the
+        // menu honest and lets the app recover on its own.
+        poll = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.refresh() }
+        }
+        refresh()
+    }
+
+    deinit { poll?.invalidate() }
 
     @Published var startsAtLogin = LoginItem.isEnabled
     /// Applying a change can take 10s on the daemon side (5s settle, plus a
@@ -42,7 +55,10 @@ final class AppModel: ObservableObject {
         startsAtLogin = LoginItem.isEnabled
     }
 
-    func refresh() { send(.status) }
+    func refresh() {
+        guard !busy else { return }
+        send(.status)
+    }
 
     func toggleEnabled() { send(.setEnabled(!isRunning)) }
 

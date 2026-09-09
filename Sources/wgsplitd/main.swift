@@ -22,13 +22,6 @@ let clashAPI = try store.loadOrCreateClashAPI()
 let supervisor = Supervisor(store: store, runner: ProcessRunner(binary: singBoxBinary),
                             clashAPI: clashAPI)
 
-// Restore whatever was running before a reboot or daemon restart.
-let startupState = store.load()
-if startupState.enabled {
-    do { try supervisor.apply(startupState); childPID = supervisor.currentPID ?? 0 }
-    catch { FileHandle.standardError.write(Data("startup apply failed: \(error)\n".utf8)) }
-}
-
 /// Read by the signal handler, which may only make async-signal-safe calls.
 nonisolated(unsafe) var childPID: Int32 = 0
 
@@ -81,4 +74,16 @@ func respond(_ requestLine: Data) -> Data {
 }
 
 // gid 20 is `staff`; the console user belongs to it and needs socket access.
-try SocketServer(path: socketPath, ownerGID: 20, handler: respond).run()
+// Listen before restoring state. The startup apply blocks for seconds while
+// sing-box settles; binding first means a client launched in that window
+// connects and waits rather than being told the daemon is unavailable.
+let server = SocketServer(path: socketPath, ownerGID: 20, handler: respond)
+let listenFD = try server.bindAndListen()
+
+let startupAppState = store.load()
+if startupAppState.enabled {
+    do { try supervisor.apply(startupAppState); childPID = supervisor.currentPID ?? 0 }
+    catch { FileHandle.standardError.write(Data("startup apply failed: \(error)\n".utf8)) }
+}
+
+while true { server.serveOnce(listenFD) }
