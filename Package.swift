@@ -8,6 +8,8 @@ let package = Package(
         .target(name: "WGSplitKit", swiftSettings: [.swiftLanguageMode(.v5)]),
         .executableTarget(name: "wgsplitd", dependencies: ["WGSplitKit"],
                           swiftSettings: [.swiftLanguageMode(.v5)]),
+        .executableTarget(name: "WGSplitApp", dependencies: ["WGSplitKit"],
+                          swiftSettings: [.swiftLanguageMode(.v5)]),
         .testTarget(name: "WGSplitKitTests", dependencies: ["WGSplitKit"],
                     resources: [.copy("Fixtures")],
                     swiftSettings: [.swiftLanguageMode(.v5)]),
