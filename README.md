@@ -233,6 +233,16 @@ It needs these repository secrets:
 | `APPLE_TEAM_ID` | 10-character team id |
 | `APPLE_APP_PASSWORD` | app-specific password for `notarytool` |
 
+Upload them with:
+
+```bash
+./Scripts/set-release-secrets.sh
+```
+
+It prompts for each value, base64-encodes the certificate for you, and pipes
+everything to `gh secret set` without writing anything to disk. Values already
+exported in the environment are used as-is, so a password manager can drive it.
+
 The same thing runs locally:
 
 ```bash
