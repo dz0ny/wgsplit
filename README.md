@@ -86,6 +86,13 @@ config can validate and still fail at startup.
 
 The menu reports three states, sourced from sing-box's clash_api:
 
+| Menu bar icon | State | Meaning |
+| --- | --- | --- |
+| pulsing plain shield | Working | a request is in flight; applying takes ~5s, 10s if it rolls back |
+| `lock.shield` | Stopped | sing-box is not running |
+| `lock.shield.fill` | Connected, no traffic yet | up, but nothing has gone through the tunnel |
+| `checkmark.shield.fill` | Connected, traffic flowing | traffic observed on `wg-out` |
+
 | State | Meaning |
 | --- | --- |
 | Stopped | sing-box is not running |

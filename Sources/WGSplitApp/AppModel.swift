@@ -8,6 +8,9 @@ final class AppModel: ObservableObject {
 
     private let client = ControlClient()
     private var poll: Timer?
+    private var pulse: Timer?
+    /// Flips while a request is in flight so the menu bar icon animates.
+    @Published private var pulseOn = false
 
     init() {
         // .onAppear is unreliable for NSMenu-backed MenuBarExtra items, and the
@@ -29,9 +32,14 @@ final class AppModel: ObservableObject {
 
     var isRunning: Bool { status?.running ?? false }
 
-    /// Filled circle only once traffic has actually gone through the tunnel;
-    /// "running" is deliberately distinguished from "working".
+    /// Filled shield only once traffic has actually gone through the tunnel;
+    /// "running" is deliberately distinguished from "working". While a request
+    /// is in flight the icon pulses, because applying a change takes seconds
+    /// and a frozen-looking menu reads as a broken app.
     var menuBarSymbol: String {
+        // Deliberately drops the lock glyph so the pulse cannot be mistaken
+        // for the steady lock.shield.fill of a running tunnel.
+        if busy { return pulseOn ? "shield.fill" : "shield" }
         switch status?.health ?? .stopped {
         case .stopped: return "lock.shield"
         case .running: return "lock.shield.fill"
@@ -39,7 +47,47 @@ final class AppModel: ObservableObject {
         }
     }
 
+    private func startPulse() {
+        guard pulse == nil else { return }
+        pulse = Timer.scheduledTimer(withTimeInterval: 0.35, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.pulseOn.toggle() }
+        }
+    }
+
+    private func stopPulse() {
+        pulse?.invalidate()
+        pulse = nil
+        pulseOn = false
+    }
+
+    /// After installing, the daemon needs a moment to bind its socket and can
+    /// then spend seconds restoring state. Poll hard until it answers so the
+    /// menu updates promptly instead of looking like the install did nothing.
+    private func awaitDaemon(deadline: Date = Date().addingTimeInterval(40)) {
+        guard status == nil, Date() < deadline else {
+            // Give up cleanly: clearing busy re-enables the menu and lets
+            // Install Helper reappear rather than stranding it on "Working…".
+            if status == nil {
+                errorMessage = "Helper installed but the daemon did not respond. "
+                             + "Check: make status"
+            }
+            busy = false
+            stopPulse()
+            return
+        }
+        Task {
+            let reachable = await Task.detached { (try? ControlClient().send(.status)) != nil }.value
+            if reachable {
+                self.send(.status)
+            } else {
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                self.awaitDaemon(deadline: deadline)
+            }
+        }
+    }
+
     var healthDescription: String {
+        if installing { return "Installing helper…" }
         if busy { return "Working…" }
         switch status?.health ?? .stopped {
         case .stopped: return "Stopped"
@@ -49,15 +97,25 @@ final class AppModel: ObservableObject {
     }
 
     /// True when the daemon has never answered, i.e. it probably is not installed.
-    var needsHelper: Bool { status == nil }
+    @Published var installing = false
+
+    var needsHelper: Bool { status == nil && !busy }
 
     func installHelper() {
         busy = true
+        startPulse()
+        installing = true
         Task {
             let failure = await Task.detached { DaemonInstaller.install() }.value
-            self.errorMessage = failure?.message
-            self.busy = false
-            self.refresh()
+            self.installing = false
+            if let failure {
+                self.errorMessage = failure.message
+                self.busy = false
+                self.stopPulse()
+                return
+            }
+            self.errorMessage = nil
+            self.awaitDaemon()
         }
     }
 
@@ -92,6 +150,7 @@ final class AppModel: ObservableObject {
 
     private func send(_ request: ControlRequest) {
         busy = true
+        startPulse()
         let client = self.client
         Task {
             let outcome = await Task.detached { () -> Result<ControlResponse, Error> in
@@ -111,6 +170,7 @@ final class AppModel: ObservableObject {
                     "Daemon not installed — choose Install Helper below."
             }
             self.busy = false
+            self.stopPulse()
         }
     }
 }
