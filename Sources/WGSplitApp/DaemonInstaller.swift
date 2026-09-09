@@ -31,13 +31,17 @@ enum DaemonInstaller {
 
     static func install() -> Failure? {
         guard let script = bundledScript else { return .scriptMissing }
+        return runAsAdmin(shellQuoted(script.path))
+    }
 
-        // Single-quote for the shell, then escape for AppleScript's own string.
-        let shellCommand = "'" + script.path.replacingOccurrences(of: "'", with: "'\\''") + "'"
+    /// Run one shell command as root through the standard macOS password
+    /// dialog. Callers build the command from trusted paths only — this runs
+    /// as root, so user input or persisted state must never reach it.
+    static func runAsAdmin(_ shellCommand: String) -> Failure? {
+        let escaped = shellCommand.replacingOccurrences(of: "\\", with: "\\\\")
+                                  .replacingOccurrences(of: "\"", with: "\\\"")
         let source = """
-        do shell script "\(shellCommand.replacingOccurrences(of: "\\", with: "\\\\")
-                                       .replacingOccurrences(of: "\"", with: "\\\""))" \
-        with administrator privileges
+        do shell script "\(escaped)" with administrator privileges
         """
 
         var errorInfo: NSDictionary?
@@ -47,5 +51,9 @@ enum DaemonInstaller {
         // -128 is the standard "user cancelled" code; not an error worth alarming about.
         if (errorInfo[NSAppleScript.errorNumber] as? Int) == -128 { return .cancelled }
         return .failed(errorInfo[NSAppleScript.errorMessage] as? String ?? "unknown error")
+    }
+
+    private static func shellQuoted(_ path: String) -> String {
+        "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 }

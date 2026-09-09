@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import WGSplitKit
 
 @MainActor
@@ -7,6 +8,8 @@ final class AppModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let client = ControlClient()
+    private var refreshing = false
+    private var revision = 0
     private var poll: Timer?
     private var pulse: Timer?
     /// Flips while a request is in flight so the menu bar icon animates.
@@ -20,6 +23,7 @@ final class AppModel: ObservableObject {
             Task { @MainActor in self?.refresh() }
         }
         refresh()
+        if autoCheckUpdates { Task { await checkForUpdate() } }
     }
 
     deinit { poll?.invalidate() }
@@ -78,6 +82,7 @@ final class AppModel: ObservableObject {
         Task {
             let reachable = await Task.detached { (try? ControlClient().send(.status)) != nil }.value
             if reachable {
+                self.busy = false
                 self.send(.status)
             } else {
                 try? await Task.sleep(nanoseconds: 500_000_000)
@@ -105,15 +110,8 @@ final class AppModel: ObservableObject {
         }
     }
 
-    var domainsLabel: String {
-        let count = status?.rules.count ?? 0
-        return count == 1 ? "Routed Domains (1)" : "Routed Domains (\(count))"
-    }
-
     /// True when the daemon has never answered, i.e. it probably is not installed.
     @Published var installing = false
-
-    var needsHelper: Bool { status == nil && !busy }
 
     func installHelper() {
         busy = true
@@ -133,6 +131,37 @@ final class AppModel: ObservableObject {
         }
     }
 
+    // MARK: app self-update
+
+    @Published var availableUpdate: SelfUpdater.Release?
+    @Published var updating = false
+    @Published var updateError: String?
+    /// Checked once per launch, and whenever Settings asks. Failures stay
+    /// silent — the next launch or a manual check retries.
+    @AppStorage("autoCheckUpdates") var autoCheckUpdates = true
+
+    var installedVersion: String { SelfUpdater.installedVersion }
+
+    func checkForUpdate() async {
+        availableUpdate = (try? await SelfUpdater.check()) ?? availableUpdate
+    }
+
+    /// Download, verify, and install `availableUpdate`. The app relaunches
+    /// itself on success, so this only returns on failure.
+    func installUpdate() {
+        guard let release = availableUpdate, !updating else { return }
+        updating = true
+        updateError = nil
+        Task {
+            do {
+                try await SelfUpdater.installAndRelaunch(release)
+            } catch {
+                self.updateError = error.localizedDescription
+                self.updating = false
+            }
+        }
+    }
+
     func toggleStartAtLogin() {
         if let problem = LoginItem.setEnabled(!startsAtLogin) {
             errorMessage = problem
@@ -141,8 +170,22 @@ final class AppModel: ObservableObject {
     }
 
     func refresh() {
-        guard !busy else { return }
-        send(.status)
+        guard !busy, !refreshing else { return }
+        refreshing = true
+        let revision = self.revision
+        let client = self.client
+        Task {
+            let response = await Task.detached { try? client.send(.status) }.value
+            self.refreshing = false
+            guard self.revision == revision else { return }
+            if case .status(let status) = response {
+                self.status = status
+                if self.errorMessage == nil { self.errorMessage = status.lastError }
+                // Keep action errors visible until the next user action.
+            } else if response == nil {
+                self.status = nil
+            }
+        }
     }
 
     func toggleEnabled() { send(.setEnabled(!isRunning)) }
@@ -156,20 +199,31 @@ final class AppModel: ObservableObject {
     func importZip(at url: URL) {
         do {
             let tunnels = try TunnelImporter.importTunnels(fromZip: url)
-            for tunnel in tunnels { send(.importTunnel(tunnel)) }
+            send(tunnels.map(ControlRequest.importTunnel))
         } catch {
             errorMessage = "Import failed: \(error)"
         }
     }
 
-    private func send(_ request: ControlRequest) {
+    private func send(_ request: ControlRequest) { send([request]) }
+
+    private func send(_ requests: [ControlRequest]) {
+        guard !busy || installing, !requests.isEmpty else { return }
+        revision += 1
+        errorMessage = nil
         busy = true
         startPulse()
         let client = self.client
         Task {
             let outcome = await Task.detached { () -> Result<ControlResponse, Error> in
-                do { return .success(try client.send(request)) }
-                catch { return .failure(error) }
+                do {
+                    var response: ControlResponse = .failure("No request was sent.")
+                    for request in requests {
+                        response = try client.send(request)
+                        if case .failure = response { break }
+                    }
+                    return .success(response)
+                } catch { return .failure(error) }
             }.value
 
             switch outcome {
@@ -181,7 +235,7 @@ final class AppModel: ObservableObject {
             case .failure:
                 self.status = nil
                 self.errorMessage =
-                    "Daemon not installed — choose Install Helper below."
+                    "Cannot reach the helper. Open Settings → General to install it."
             }
             self.busy = false
             self.stopPulse()
