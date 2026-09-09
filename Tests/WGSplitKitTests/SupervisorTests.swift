@@ -1,14 +1,14 @@
 import XCTest
 @testable import WGSplitKit
 
-private final class FakeHandle: SingBoxRunning, @unchecked Sendable {
+final class FakeHandle: SingBoxRunning, @unchecked Sendable {
     var alive = true
     var terminated = false
     var isRunning: Bool { alive }
     func terminate() { terminated = true; alive = false }
 }
 
-private final class FakeRunner: SingBoxRunner, @unchecked Sendable {
+final class FakeRunner: SingBoxRunner, @unchecked Sendable {
     var checkFailsWith: String?
     /// Config contents that should die on start, simulating a runtime-only failure.
     var diesOnStartContaining: String?
@@ -95,5 +95,78 @@ final class SupervisorTests: XCTestCase {
         try sup.apply(state(rule: "*.niteo.co", enabled: false))
         XCTAssertFalse(sup.isRunning)
         XCTAssertTrue(runner.handles[0].terminated)
+    }
+}
+
+final class SupervisorHealthTests: XCTestCase {
+    private func makeStore() throws -> StateStore {
+        let d = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
+        return StateStore(directory: d)
+    }
+
+    private func state(enabled: Bool = true) -> State {
+        let t = Tunnel(name: "n", privateKey: "cHJpdg==", addresses: ["10.0.0.2/32"],
+                       dns: ["1.1.1.1"], mtu: nil, peerPublicKey: "cHViCg==",
+                       peerPresharedKey: nil, endpointHost: "1.2.3.4",
+                       endpointPort: 443, persistentKeepalive: 25)
+        return State(tunnels: [t], rules: [Rule(pattern: "*.niteo.co")],
+                     activeTunnelID: t.id, enabled: enabled)
+    }
+
+    func testStoppedWhenNotRunning() throws {
+        let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
+                             settleSeconds: 0, trafficProbe: { true })
+        XCTAssertEqual(sup.health, .stopped)
+    }
+
+    func testRunningWhenNoTunnelTrafficSeen() throws {
+        let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
+                             settleSeconds: 0, trafficProbe: { false })
+        try sup.apply(state())
+        XCTAssertEqual(sup.health, .running)
+    }
+
+    func testActiveOnceTrafficSeen() throws {
+        let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
+                             settleSeconds: 0, trafficProbe: { true })
+        try sup.apply(state())
+        XCTAssertEqual(sup.health, .active)
+    }
+
+    func testActiveIsStickyWhileRunning() throws {
+        var traffic = true
+        let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
+                             settleSeconds: 0, trafficProbe: { traffic })
+        try sup.apply(state())
+        XCTAssertEqual(sup.health, .active)
+        traffic = false
+        XCTAssertEqual(sup.health, .active, "should not flap back when idle")
+    }
+
+    func testStickinessResetsOnStop() throws {
+        var traffic = true
+        let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
+                             settleSeconds: 0, trafficProbe: { traffic })
+        try sup.apply(state())
+        XCTAssertEqual(sup.health, .active)
+        traffic = false
+        try sup.apply(state(enabled: false))
+        try sup.apply(state())
+        XCTAssertEqual(sup.health, .running)
+    }
+}
+
+final class ClashAPIPersistenceTests: XCTestCase {
+    func testCredentialsAreStableAcrossCalls() throws {
+        let d = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
+        let store = StateStore(directory: d)
+        let first = try store.loadOrCreateClashAPI()
+        XCTAssertEqual(try store.loadOrCreateClashAPI(), first)
+        let attrs = try FileManager.default.attributesOfItem(atPath: store.clashAPIURL.path)
+        XCTAssertEqual((attrs[.posixPermissions] as? NSNumber)?.int16Value, 0o600)
     }
 }

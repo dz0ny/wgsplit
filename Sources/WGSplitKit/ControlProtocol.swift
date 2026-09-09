@@ -21,13 +21,15 @@ public struct TunnelSummary: Codable, Equatable, Sendable {
 
 public struct Status: Codable, Equatable, Sendable {
     public var running: Bool
+    public var health: Health
     public var activeTunnelID: UUID?
     public var tunnels: [TunnelSummary]
     public var rules: [Rule]
     public var lastError: String?
 
-    public init(state: State, running: Bool, lastError: String?) {
+    public init(state: State, running: Bool, health: Health = .stopped, lastError: String?) {
         self.running = running
+        self.health = health
         self.activeTunnelID = state.activeTunnelID
         self.tunnels = state.tunnels.map {
             TunnelSummary(id: $0.id, name: $0.name, addresses: $0.addresses)

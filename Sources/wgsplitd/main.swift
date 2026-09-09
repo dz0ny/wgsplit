@@ -11,7 +11,9 @@ let singBoxBinary = URL(fileURLWithPath:
         ?? "/Library/PrivilegedHelperTools/wgsplit/sing-box")
 
 let store = StateStore(directory: supportDirectory)
-let supervisor = Supervisor(store: store, runner: ProcessRunner(binary: singBoxBinary))
+let clashAPI = try store.loadOrCreateClashAPI()
+let supervisor = Supervisor(store: store, runner: ProcessRunner(binary: singBoxBinary),
+                            clashAPI: clashAPI)
 
 // Restore whatever was running before a reboot or daemon restart.
 let startupState = store.load()
@@ -50,6 +52,7 @@ func respond(_ requestLine: Data) -> Data {
         }
         return reply(.status(Status(state: store.load(),
                                     running: supervisor.isRunning,
+                                    health: supervisor.health,
                                     lastError: supervisor.lastError)))
     } catch {
         return reply(.failure("\(error)"))

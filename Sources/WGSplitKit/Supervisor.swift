@@ -28,22 +28,39 @@ public final class Supervisor: @unchecked Sendable {
     private let store: StateStore
     private let runner: SingBoxRunner
     private let settleSeconds: TimeInterval
+    private let clashAPI: ClashAPI?
+    private let trafficProbe: () -> Bool
     private var handle: SingBoxRunning?
+    /// Sticky for the lifetime of one sing-box run: once traffic has gone
+    /// through the tunnel we keep reporting active rather than flapping back
+    /// to `running` whenever the user simply stops browsing.
+    private var sawTraffic = false
 
     public private(set) var lastError: String?
 
-    public init(store: StateStore, runner: SingBoxRunner, settleSeconds: TimeInterval = 5) {
+    public init(store: StateStore, runner: SingBoxRunner, settleSeconds: TimeInterval = 5,
+                clashAPI: ClashAPI? = nil, trafficProbe: (() -> Bool)? = nil) {
         self.store = store; self.runner = runner; self.settleSeconds = settleSeconds
+        self.clashAPI = clashAPI
+        self.trafficProbe = trafficProbe
+            ?? { clashAPI.map { ClashClient(api: $0).sawTunnelTraffic() } ?? false }
     }
 
     public var isRunning: Bool { handle?.isRunning ?? false }
+
+    public var health: Health {
+        guard isRunning else { return .stopped }
+        if sawTraffic { return .active }
+        sawTraffic = trafficProbe()
+        return sawTraffic ? .active : .running
+    }
 
     public func apply(_ state: State) throws {
         try store.save(state)
 
         guard state.enabled, state.activeTunnel != nil else { stop(); return }
 
-        let config = try ConfigGenerator.generate(state: state)
+        let config = try ConfigGenerator.generate(state: state, clashAPI: clashAPI)
         try store.write(config, to: store.configURL)
 
         do {
@@ -71,6 +88,7 @@ public final class Supervisor: @unchecked Sendable {
     public func stop() {
         handle?.terminate()
         handle = nil
+        sawTraffic = false
     }
 
     private func startAndSettle(_ configPath: URL) throws {

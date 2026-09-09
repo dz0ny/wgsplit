@@ -8,7 +8,7 @@ public enum GeneratorError: Error, Equatable {
 /// dns-direct must carry no `detour`, and `route.default_domain_resolver` is
 /// mandatory. Violating either makes sing-box refuse to start.
 public enum ConfigGenerator {
-    public static func generate(state: State) throws -> Data {
+    public static func generate(state: State, clashAPI: ClashAPI? = nil) throws -> Data {
         guard let tunnel = state.activeTunnel else { throw GeneratorError.noActiveTunnel }
         let compiled = try RuleCompiler.compile(state.rules)
 
@@ -46,7 +46,7 @@ public enum ConfigGenerator {
         if !compiled.domainSuffixes.isEmpty { domainRule["domain_suffix"] = compiled.domainSuffixes }
         if !compiled.domains.isEmpty { domainRule["domain"] = compiled.domains }
 
-        let config: [String: Any] = [
+        var config: [String: Any] = [
             "log": ["level": "info", "timestamp": true],
             "dns": ["servers": dnsServers, "rules": dnsRules,
                     "final": "dns-direct", "strategy": "ipv4_only"],
@@ -64,6 +64,13 @@ public enum ConfigGenerator {
                 "default_domain_resolver": ["server": "dns-direct"],
             ],
         ]
+
+        if let clashAPI {
+            config["experimental"] = [
+                "clash_api": ["external_controller": "127.0.0.1:\(clashAPI.port)",
+                              "secret": clashAPI.secret],
+            ]
+        }
 
         return try JSONSerialization.data(withJSONObject: config,
                                           options: [.prettyPrinted, .sortedKeys])

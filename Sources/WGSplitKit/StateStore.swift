@@ -7,6 +7,20 @@ public struct StateStore: Sendable {
     public var stateURL: URL { directory.appendingPathComponent("state.json") }
     public var configURL: URL { directory.appendingPathComponent("config.json") }
     public var lastGoodURL: URL { directory.appendingPathComponent("config.last-good.json") }
+    public var clashAPIURL: URL { directory.appendingPathComponent("clash-api.json") }
+
+    /// Generated once and reused, so a rollback to last-known-good config
+    /// keeps credentials that still work.
+    public func loadOrCreateClashAPI() throws -> ClashAPI {
+        if let data = try? Data(contentsOf: clashAPIURL),
+           let api = try? JSONDecoder().decode(ClashAPI.self, from: data) {
+            return api
+        }
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let api = ClashAPI.random()
+        try write(try JSONEncoder().encode(api), to: clashAPIURL)
+        return api
+    }
 
     /// Never throws: a corrupt or absent file yields an empty state so the
     /// daemon always starts.
