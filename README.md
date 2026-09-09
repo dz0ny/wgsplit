@@ -84,26 +84,24 @@ config can validate and still fail at startup.
 
 ## Status reporting
 
-The menu reports three states, sourced from sing-box's clash_api:
+The menu reports three states. Health is an **active probe**: the daemon asks
+sing-box's clash_api to time a request through the `wg-out` outbound, so it
+measures whether the tunnel actually carries traffic.
 
-| Menu bar icon | State | Meaning |
+| Menu bar icon | Headline | Meaning |
 | --- | --- | --- |
-| pulsing plain shield | Working | a request is in flight; applying takes ~5s, 10s if it rolls back |
+| pulsing plain shield | Working… | a request is in flight |
 | `lock.shield` | Stopped | sing-box is not running |
-| `lock.shield.fill` | Connected, no traffic yet | up, but nothing has gone through the tunnel |
-| `checkmark.shield.fill` | Connected, traffic flowing | traffic observed on `wg-out` |
+| `lock.shield.fill` | Connected · not passing traffic | up, but the probe fails — e.g. a wrong key |
+| `checkmark.shield.fill` | Connected · Niteo DE · 42 ms | probe succeeded, with measured latency |
 
-| State | Meaning |
-| --- | --- |
-| Stopped | sing-box is not running |
-| Connected — no traffic yet | up, but nothing has gone through the tunnel |
-| Connected — traffic flowing | traffic observed on the `wg-out` outbound |
+An earlier version counted live connections via `/connections`, which was wrong:
+that endpoint lists only currently-open connections, so ordinary short requests
+finished before any poll could see them. The probe is deterministic and, unlike
+connection counting, actually detects a broken tunnel.
 
-This is not WireGuard handshake state — sing-box exposes no such query. A wrong
-preshared key sits at "no traffic yet" rather than reporting a fault, so treat that
-state as *absence of evidence*, not proof of a broken tunnel. "Traffic flowing" is
-sticky for the lifetime of one sing-box run so it does not flap back whenever you
-stop browsing.
+The probe runs at most every 20s, off the request thread, so a status query never
+blocks on the network.
 
 clash_api is bound to `127.0.0.1` on a random high port with a random secret,
 generated once and persisted `0600` beside `state.json`. Only the daemon reads it;

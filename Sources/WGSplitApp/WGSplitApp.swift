@@ -27,53 +27,55 @@ struct MenuContent: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
+        Text(model.headline)
+
         if let status = model.status {
-            Text(model.healthDescription)
             Button(status.running ? "Stop" : "Start") { model.toggleEnabled() }
                 .disabled(model.busy)
-            Divider()
-            if status.tunnels.isEmpty {
-                Text("No tunnels imported")
-            } else {
-                ForEach(status.tunnels, id: \.id) { tunnel in
-                    Button(tunnel.id == status.activeTunnelID ? "✓ \(tunnel.name)" : tunnel.name) {
-                        model.setActive(tunnel.id)
+
+            if !status.tunnels.isEmpty {
+                Section("Tunnel") {
+                    ForEach(status.tunnels, id: \.id) { tunnel in
+                        Button(tunnel.id == status.activeTunnelID ? "✓ \(tunnel.name)"
+                                                                  : "   \(tunnel.name)") {
+                            model.setActive(tunnel.id)
+                        }
                     }
                 }
             }
-            Divider()
-            if status.rules.isEmpty {
-                Text("No routed domains")
-            } else {
-                ForEach(status.rules.prefix(8), id: \.pattern) { Text($0.pattern) }
-                if status.rules.count > 8 {
-                    Text("+ \(status.rules.count - 8) more")
+
+            Section {
+                Menu(model.domainsLabel) {
+                    if status.rules.isEmpty {
+                        Text("Nothing is being routed")
+                    } else {
+                        ForEach(status.rules, id: \.pattern) { Text($0.pattern) }
+                    }
+                    Divider()
+                    Button("Edit…") { openDomains() }
                 }
+                Button("Edit Domains…") { openDomains() }
+                Button("Import Tunnels…") { importZip() }
             }
-        } else {
-            Text(model.errorMessage ?? "Connecting…")
+        } else if model.needsHelper {
+            Section {
+                Button("Install Helper…") { model.installHelper() }
+                    .disabled(model.busy)
+            }
         }
 
-        if model.needsHelper {
-            Divider()
-            Button("Install Helper…") { model.installHelper() }
-                .disabled(model.busy)
+        Section {
+            Button(model.startsAtLogin ? "✓ Start at Login" : "   Start at Login") {
+                model.toggleStartAtLogin()
+            }
+            Button("Quit wgsplit") { NSApplication.shared.terminate(nil) }
+                .onAppear { model.refresh() }
         }
+    }
 
-        Divider()
-        Button("Edit Domains…") {
-            NSApp.activate(ignoringOtherApps: true)
-            openWindow(id: "domains")
-        }
-        Button("Import Tunnels from Zip…") { importZip() }
-        Button("Refresh") { model.refresh() }
-
-        Divider()
-        Button(model.startsAtLogin ? "✓ Start at Login" : "Start at Login") {
-            model.toggleStartAtLogin()
-        }
-        Button("Quit") { NSApplication.shared.terminate(nil) }
-            .onAppear { model.refresh() }
+    private func openDomains() {
+        NSApp.activate(ignoringOtherApps: true)
+        openWindow(id: "domains")
     }
 
     private func importZip() {

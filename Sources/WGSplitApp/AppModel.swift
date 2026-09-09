@@ -86,14 +86,28 @@ final class AppModel: ObservableObject {
         }
     }
 
-    var healthDescription: String {
+    /// One line combining state and active tunnel, so the top of the menu
+    /// says something useful instead of showing a greyed-out fragment.
+    var headline: String {
         if installing { return "Installing helper…" }
         if busy { return "Working…" }
-        switch status?.health ?? .stopped {
-        case .stopped: return "Stopped"
-        case .running: return "Connected — no traffic yet"
-        case .active: return "Connected — traffic flowing"
+        guard let status else { return errorMessage ?? "Connecting…" }
+
+        let tunnel = status.tunnels.first { $0.id == status.activeTunnelID }?.name
+        switch status.health {
+        case .stopped:
+            return tunnel.map { "Stopped · \($0)" } ?? "Stopped"
+        case .running:
+            return "Connected · not passing traffic"
+        case .active:
+            let latency = status.latencyMs.map { " · \($0) ms" } ?? ""
+            return "Connected\(tunnel.map { " · \($0)" } ?? "")\(latency)"
         }
+    }
+
+    var domainsLabel: String {
+        let count = status?.rules.count ?? 0
+        return count == 1 ? "Routed Domains (1)" : "Routed Domains (\(count))"
     }
 
     /// True when the daemon has never answered, i.e. it probably is not installed.

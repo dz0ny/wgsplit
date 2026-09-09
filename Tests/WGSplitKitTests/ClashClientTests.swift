@@ -2,29 +2,23 @@ import XCTest
 @testable import WGSplitKit
 
 final class ClashClientTests: XCTestCase {
-    private func json(_ chains: [[String]]) -> Data {
-        let conns = chains.map { ["id": UUID().uuidString, "chains": $0] as [String: Any] }
-        return try! JSONSerialization.data(withJSONObject:
-            ["downloadTotal": 0, "uploadTotal": 0, "connections": conns])
+    func testParsesDelayOnSuccess() {
+        let body = Data(#"{"delay":142}"#.utf8)
+        XCTAssertEqual(ClashClient.parseDelay(body, statusCode: 200), 142)
     }
 
-    func testTrafficThroughTunnelIsActive() throws {
-        XCTAssertTrue(ClashClient.sawTunnelTraffic(in: json([["wg-out"]])))
+    func testTimeoutReportsNoDelay() {
+        // 504 is what sing-box returns when the probe cannot reach the target
+        // through the outbound — i.e. the tunnel is not carrying traffic.
+        let body = Data(#"{"message":"An error occurred in the delay test"}"#.utf8)
+        XCTAssertNil(ClashClient.parseDelay(body, statusCode: 504))
     }
 
-    func testTunnelAnywhereInChainCounts() throws {
-        XCTAssertTrue(ClashClient.sawTunnelTraffic(in: json([["tun-in", "wg-out"]])))
+    func testGarbageBodyReportsNoDelay() {
+        XCTAssertNil(ClashClient.parseDelay(Data("nonsense".utf8), statusCode: 200))
     }
 
-    func testOnlyDirectTrafficIsNotActive() throws {
-        XCTAssertFalse(ClashClient.sawTunnelTraffic(in: json([["direct"], ["tun-in", "direct"]])))
-    }
-
-    func testNoConnectionsIsNotActive() throws {
-        XCTAssertFalse(ClashClient.sawTunnelTraffic(in: json([])))
-    }
-
-    func testGarbageIsNotActive() throws {
-        XCTAssertFalse(ClashClient.sawTunnelTraffic(in: Data("nonsense".utf8)))
+    func testMissingDelayFieldReportsNoDelay() {
+        XCTAssertNil(ClashClient.parseDelay(Data(#"{"ok":true}"#.utf8), statusCode: 200))
     }
 }

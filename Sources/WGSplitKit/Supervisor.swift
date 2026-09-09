@@ -30,21 +30,25 @@ public final class Supervisor: @unchecked Sendable {
     private let runner: SingBoxRunner
     private let settleSeconds: TimeInterval
     private let clashAPI: ClashAPI?
-    private let trafficProbe: () -> Bool
+    /// Returns latency through the tunnel in ms, or nil when it is not
+    /// carrying traffic. Injected so tests need no network.
+    private let trafficProbe: () -> Int?
+    private let probeInterval: TimeInterval
+    private let probeLock = NSLock()
+    private var lastProbe: (at: Date, delayMs: Int?)?
+    private var probing = false
     private var handle: SingBoxRunning?
-    /// Sticky for the lifetime of one sing-box run: once traffic has gone
-    /// through the tunnel we keep reporting active rather than flapping back
-    /// to `running` whenever the user simply stops browsing.
-    private var sawTraffic = false
 
     public private(set) var lastError: String?
 
     public init(store: StateStore, runner: SingBoxRunner, settleSeconds: TimeInterval = 5,
-                clashAPI: ClashAPI? = nil, trafficProbe: (() -> Bool)? = nil) {
+                clashAPI: ClashAPI? = nil, probeInterval: TimeInterval = 20,
+                trafficProbe: (() -> Int?)? = nil) {
         self.store = store; self.runner = runner; self.settleSeconds = settleSeconds
         self.clashAPI = clashAPI
+        self.probeInterval = probeInterval
         self.trafficProbe = trafficProbe
-            ?? { clashAPI.map { ClashClient(api: $0).sawTunnelTraffic() } ?? false }
+            ?? { clashAPI.flatMap { ClashClient(api: $0).tunnelDelay() } }
     }
 
     public var isRunning: Bool { handle?.isRunning ?? false }
@@ -53,11 +57,37 @@ public final class Supervisor: @unchecked Sendable {
     /// only async-signal-safe calls are allowed in that context.
     public var currentPID: Int32? { handle.map(\.processIdentifier) }
 
+    /// Latency through the tunnel from the most recent probe, if it succeeded.
+    public var latencyMs: Int? {
+        probeLock.lock(); defer { probeLock.unlock() }
+        return lastProbe?.delayMs
+    }
+
     public var health: Health {
         guard isRunning else { return .stopped }
-        if sawTraffic { return .active }
-        sawTraffic = trafficProbe()
-        return sawTraffic ? .active : .running
+        refreshProbeIfStale()
+        probeLock.lock(); defer { probeLock.unlock() }
+        guard let last = lastProbe else { return .running }
+        return last.delayMs == nil ? .running : .active
+    }
+
+    /// Probes off the caller's thread so a status request never blocks on the
+    /// network; callers see the previous result until the new one lands.
+    private func refreshProbeIfStale() {
+        probeLock.lock()
+        let fresh = lastProbe.map { Date().timeIntervalSince($0.at) < probeInterval } ?? false
+        if fresh || probing { probeLock.unlock(); return }
+        probing = true
+        probeLock.unlock()
+
+        let probe = trafficProbe
+        Thread {
+            let delay = probe()
+            self.probeLock.lock()
+            self.lastProbe = (Date(), delay)
+            self.probing = false
+            self.probeLock.unlock()
+        }.start()
     }
 
     public func apply(_ state: AppState) throws {
@@ -93,7 +123,9 @@ public final class Supervisor: @unchecked Sendable {
     public func stop() {
         handle?.terminate()
         handle = nil
-        sawTraffic = false
+        probeLock.lock()
+        lastProbe = nil
+        probeLock.unlock()
     }
 
     private func startAndSettle(_ configPath: URL) throws {

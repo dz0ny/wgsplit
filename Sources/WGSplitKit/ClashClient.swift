@@ -1,37 +1,54 @@
 import Foundation
 
-/// Polls sing-box's clash_api to see whether any traffic has been routed
-/// through the tunnel outbound.
+/// Talks to sing-box's clash_api.
+///
+/// Health is an *active* probe: clash's /connections only lists currently open
+/// connections, so a short request finishes long before any poll sees it. Asking
+/// the API to time a request through the `wg-out` outbound instead is
+/// deterministic, and it distinguishes a tunnel that is up from one that is
+/// merely running — a wrong key fails the probe rather than looking connected.
 public struct ClashClient: Sendable {
+    public static let outboundTag = "wg-out"
+
     private let api: ClashAPI
     private let timeout: TimeInterval
 
-    public init(api: ClashAPI, timeout: TimeInterval = 2) {
+    public init(api: ClashAPI, timeout: TimeInterval = 3) {
         self.api = api; self.timeout = timeout
     }
 
-    /// Pure over the response body so it is testable without an HTTP server.
-    public static func sawTunnelTraffic(in body: Data) -> Bool {
-        guard let root = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
-              let connections = root["connections"] as? [[String: Any]]
-        else { return false }
-        return connections.contains { connection in
-            (connection["chains"] as? [String])?.contains("wg-out") ?? false
-        }
+    public static func parseDelay(_ body: Data, statusCode: Int) -> Int? {
+        guard statusCode == 200,
+              let root = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+              let delay = root["delay"] as? Int
+        else { return nil }
+        return delay
     }
 
-    public func sawTunnelTraffic() -> Bool {
-        guard let url = URL(string: "http://127.0.0.1:\(api.port)/connections") else { return false }
+    /// Milliseconds through the tunnel, or nil when it is not carrying traffic.
+    public func tunnelDelay() -> Int? {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "127.0.0.1"
+        components.port = api.port
+        components.path = "/proxies/\(Self.outboundTag)/delay"
+        components.queryItems = [
+            URLQueryItem(name: "url", value: "http://www.gstatic.com/generate_204"),
+            URLQueryItem(name: "timeout", value: "2000"),
+        ]
+        guard let url = components.url else { return nil }
+
         var request = URLRequest(url: url, timeoutInterval: timeout)
         request.setValue("Bearer \(api.secret)", forHTTPHeaderField: "Authorization")
 
-        var body: Data?
+        var result: Int?
         let done = DispatchSemaphore(value: 0)
-        URLSession.shared.dataTask(with: request) { data, _, _ in
-            body = data
+        URLSession.shared.dataTask(with: request) { data, response, _ in
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            result = data.flatMap { Self.parseDelay($0, statusCode: code) }
             done.signal()
         }.resume()
-        guard done.wait(timeout: .now() + timeout + 1) == .success, let body else { return false }
-        return Self.sawTunnelTraffic(in: body)
+        _ = done.wait(timeout: .now() + timeout + 1)
+        return result
     }
 }

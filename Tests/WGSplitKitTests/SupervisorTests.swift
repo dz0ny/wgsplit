@@ -116,47 +116,66 @@ final class SupervisorHealthTests: XCTestCase {
                      activeTunnelID: t.id, enabled: enabled)
     }
 
+    /// The probe runs off-thread, so settle before asserting on its result.
+    private func healthAfterProbe(_ sup: Supervisor) -> Health {
+        _ = sup.health
+        let deadline = Date().addingTimeInterval(2)
+        while sup.latencyMs == nil && Date() < deadline { usleep(20_000) }
+        return sup.health
+    }
+
     func testStoppedWhenNotRunning() throws {
         let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
-                             settleSeconds: 0, trafficProbe: { true })
+                             settleSeconds: 0, trafficProbe: { 42 })
         XCTAssertEqual(sup.health, .stopped)
     }
 
-    func testRunningWhenNoTunnelTrafficSeen() throws {
+    func testRunningWhenProbeFails() throws {
         let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
-                             settleSeconds: 0, trafficProbe: { false })
+                             settleSeconds: 0, trafficProbe: { nil })
         try sup.apply(state())
+        _ = sup.health
+        Thread.sleep(forTimeInterval: 0.3)
         XCTAssertEqual(sup.health, .running)
+        XCTAssertNil(sup.latencyMs)
     }
 
-    func testActiveOnceTrafficSeen() throws {
+    func testActiveWhenProbeSucceeds() throws {
         let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
-                             settleSeconds: 0, trafficProbe: { true })
+                             settleSeconds: 0, trafficProbe: { 42 })
         try sup.apply(state())
-        XCTAssertEqual(sup.health, .active)
+        XCTAssertEqual(healthAfterProbe(sup), .active)
+        XCTAssertEqual(sup.latencyMs, 42)
     }
 
-    func testActiveIsStickyWhileRunning() throws {
-        var traffic = true
+    func testProbeIsCachedRatherThanRunPerQuery() throws {
+        let calls = Counter()
         let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
-                             settleSeconds: 0, trafficProbe: { traffic })
+                             settleSeconds: 0, probeInterval: 60,
+                             trafficProbe: { calls.bump(); return 7 })
         try sup.apply(state())
-        XCTAssertEqual(sup.health, .active)
-        traffic = false
-        XCTAssertEqual(sup.health, .active, "should not flap back when idle")
+        _ = healthAfterProbe(sup)
+        for _ in 0..<20 { _ = sup.health }
+        Thread.sleep(forTimeInterval: 0.2)
+        XCTAssertEqual(calls.value, 1, "probe should be cached, not run per status query")
     }
 
-    func testStickinessResetsOnStop() throws {
-        var traffic = true
+    func testProbeResultClearedOnStop() throws {
         let sup = Supervisor(store: try makeStore(), runner: FakeRunner(),
-                             settleSeconds: 0, trafficProbe: { traffic })
+                             settleSeconds: 0, trafficProbe: { 42 })
         try sup.apply(state())
-        XCTAssertEqual(sup.health, .active)
-        traffic = false
+        XCTAssertEqual(healthAfterProbe(sup), .active)
         try sup.apply(state(enabled: false))
-        try sup.apply(state())
-        XCTAssertEqual(sup.health, .running)
+        XCTAssertNil(sup.latencyMs)
+        XCTAssertEqual(sup.health, .stopped)
     }
+}
+
+final class Counter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+    func bump() { lock.lock(); count += 1; lock.unlock() }
+    var value: Int { lock.lock(); defer { lock.unlock() }; return count }
 }
 
 final class ClashAPIPersistenceTests: XCTestCase {

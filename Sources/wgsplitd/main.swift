@@ -67,6 +67,7 @@ func respond(_ requestLine: Data) -> Data {
         return reply(.status(Status(state: store.load(),
                                     running: supervisor.isRunning,
                                     health: supervisor.health,
+                                    latencyMs: supervisor.latencyMs,
                                     lastError: supervisor.lastError)))
     } catch {
         return reply(.failure("\(error)"))
