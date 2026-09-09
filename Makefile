@@ -2,6 +2,15 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 APP := dist/WGSplit.app
+# Ad-hoc identity by default; a real one enables notarization.
+#   make release SIGN_ID="Developer ID Application: NAME (TEAMID)" \
+#     APPLE_ID=you@example.com TEAM_ID=TEAMID APP_PW=app-specific-password
+VERSION ?= $(shell git describe --tags --always 2>/dev/null || echo 0.0.0)
+SIGN_ID ?= -
+APPLE_ID ?=
+TEAM_ID ?=
+APP_PW ?=
+export VERSION SIGN_ID
 
 .PHONY: help
 help: ## Show this help
@@ -15,8 +24,31 @@ Resources/sing-box:
 
 .PHONY: build
 build: singbox ## Build everything and assemble WGSplit.app
-	@swift build -c release --product WGSplitApp --product wgsplitd
+	@swift build -c release
 	@./Scripts/bundle.sh
+
+.PHONY: dmg
+dmg: build ## Package WGSplit.app into a distributable disk image
+	@./Scripts/make-dmg.sh
+
+.PHONY: dmg
+dmg: build ## Package WGSplit.app into a distributable disk image
+	@./Scripts/make-dmg.sh
+
+.PHONY: notarize
+notarize: dmg ## Submit the disk image to Apple, then staple app and image
+	@if [ "$(SIGN_ID)" = "-" ]; then \
+	  echo "notarization needs a Developer ID: make notarize SIGN_ID=..."; exit 1; \
+	fi
+	@xcrun notarytool submit dist/WGSplit.dmg \
+	  --apple-id "$(APPLE_ID)" --team-id "$(TEAM_ID)" --password "$(APP_PW)" --wait
+	@xcrun stapler staple $(APP)
+	@xcrun stapler staple dist/WGSplit.dmg
+	@xcrun stapler validate $(APP)
+
+.PHONY: release
+release: notarize ## Signed, notarized app and disk image ready to publish
+	@echo "release $(VERSION) ready in dist/"
 
 .PHONY: run
 run: kill build ## Rebuild and relaunch the app (kills the running copy first)
