@@ -68,6 +68,7 @@ func respond(_ requestLine: Data) -> Data {
                                     running: supervisor.isRunning,
                                     health: supervisor.health,
                                     latencyMs: supervisor.latencyMs,
+                                    traffic: supervisor.traffic,
                                     lastError: supervisor.lastError)))
     } catch {
         return reply(.failure("\(error)"))

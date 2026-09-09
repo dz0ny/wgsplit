@@ -25,6 +25,36 @@ public struct ClashClient: Sendable {
         return delay
     }
 
+    static func parseConnections(_ body: Data, statusCode: Int) -> [TrafficConnection]? {
+        struct Snapshot: Decodable { let connections: [TrafficConnection]? }
+        guard statusCode == 200,
+              let snapshot = try? JSONDecoder().decode(Snapshot.self, from: body),
+              let root = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+              root.keys.contains("connections") else { return nil }
+        let connections = snapshot.connections ?? []
+        guard connections.allSatisfy({ $0.upload >= 0 && $0.download >= 0 }) else { return nil }
+        return connections
+    }
+
+    func tunnelConnections() -> [TrafficConnection]? {
+        let url = URL(string: "http://127.0.0.1:\(api.port)/connections")!
+        var request = URLRequest(url: url, timeoutInterval: timeout)
+        request.setValue("Bearer \(api.secret)", forHTTPHeaderField: "Authorization")
+        let result = ConnectionResult()
+        let done = DispatchSemaphore(value: 0)
+        let task = URLSession.shared.dataTask(with: request) { data, response, _ in
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            result.lock.lock()
+            result.value = data.flatMap { Self.parseConnections($0, statusCode: code) }
+            result.lock.unlock()
+            done.signal()
+        }
+        task.resume()
+        if done.wait(timeout: .now() + timeout + 1) == .timedOut { task.cancel(); return nil }
+        result.lock.lock(); defer { result.lock.unlock() }
+        return result.value
+    }
+
     /// Milliseconds through the tunnel, or nil when it is not carrying traffic.
     public func tunnelDelay() -> Int? {
         var components = URLComponents()
@@ -51,4 +81,9 @@ public struct ClashClient: Sendable {
         _ = done.wait(timeout: .now() + timeout + 1)
         return result
     }
+}
+
+private final class ConnectionResult: @unchecked Sendable {
+    let lock = NSLock()
+    var value: [TrafficConnection]?
 }

@@ -37,6 +37,11 @@ public final class Supervisor: @unchecked Sendable {
     private let probeLock = NSLock()
     private var lastProbe: (at: Date, delayMs: Int?)?
     private var probing = false
+    private var trafficTimer: DispatchSourceTimer?
+    private let trafficLock = NSLock()
+    private var trafficGeneration = UUID()
+    private var trafficAccumulator = TunnelTrafficAccumulator()
+    private var trafficAvailable = false
     private var handle: SingBoxRunning?
 
     public private(set) var lastError: String?
@@ -90,6 +95,33 @@ public final class Supervisor: @unchecked Sendable {
         }.start()
     }
 
+    public var traffic: TunnelTraffic? {
+        guard isRunning else { return nil }
+        trafficLock.lock(); defer { trafficLock.unlock() }
+        return trafficAvailable ? trafficAccumulator.total : nil
+    }
+
+    private func startTrafficMonitor() {
+        guard let clashAPI else { return }
+        let timer = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "wgsplit.traffic"))
+        trafficLock.lock()
+        let generation = trafficGeneration
+        trafficLock.unlock()
+        timer.schedule(deadline: .now(), repeating: .seconds(1))
+        timer.setEventHandler { [weak self] in
+            let connections = ClashClient(api: clashAPI, timeout: 1).tunnelConnections()
+            guard let self else { return }
+            self.trafficLock.lock(); defer { self.trafficLock.unlock() }
+            guard self.trafficGeneration == generation else { return }
+            self.trafficAvailable = connections != nil
+            if let connections { _ = self.trafficAccumulator.record(connections) }
+        }
+        trafficTimer = timer
+        timer.resume()
+    }
+
+    deinit { trafficTimer?.cancel() }
+
     public func apply(_ state: AppState) throws {
         try store.save(state)
 
@@ -121,6 +153,13 @@ public final class Supervisor: @unchecked Sendable {
     }
 
     public func stop() {
+        trafficTimer?.cancel()
+        trafficTimer = nil
+        trafficLock.lock()
+        trafficGeneration = UUID()
+        trafficAccumulator = TunnelTrafficAccumulator()
+        trafficAvailable = false
+        trafficLock.unlock()
         handle?.terminate()
         handle = nil
         probeLock.lock()
@@ -136,6 +175,7 @@ public final class Supervisor: @unchecked Sendable {
             handle = nil
             throw ApplyError.diedOnStart("sing-box exited within \(settleSeconds)s of start")
         }
+        startTrafficMonitor()
     }
 
     private func rollback() {

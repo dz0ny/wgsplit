@@ -22,6 +22,7 @@ public struct TunnelSummary: Codable, Equatable, Sendable {
 public struct Status: Codable, Equatable, Sendable {
     public var running: Bool
     public var health: Health
+    public var traffic: TunnelTraffic?
     public var latencyMs: Int?
     public var activeTunnelID: UUID?
     public var tunnels: [TunnelSummary]
@@ -29,10 +30,11 @@ public struct Status: Codable, Equatable, Sendable {
     public var lastError: String?
 
     public init(state: AppState, running: Bool, health: Health = .stopped,
-                latencyMs: Int? = nil, lastError: String?) {
+                latencyMs: Int? = nil, traffic: TunnelTraffic? = nil, lastError: String?) {
         self.running = running
         self.health = health
         self.latencyMs = latencyMs
+        self.traffic = traffic
         self.activeTunnelID = state.activeTunnelID
         self.tunnels = state.tunnels.map {
             TunnelSummary(id: $0.id, name: $0.name, addresses: $0.addresses)
