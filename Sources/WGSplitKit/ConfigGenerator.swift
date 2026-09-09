@@ -8,7 +8,7 @@ public enum GeneratorError: Error, Equatable {
 /// dns-direct must carry no `detour`, and `route.default_domain_resolver` is
 /// mandatory. Violating either makes sing-box refuse to start.
 public enum ConfigGenerator {
-    public static func generate(state: State, clashAPI: ClashAPI? = nil) throws -> Data {
+    public static func generate(state: AppState, clashAPI: ClashAPI? = nil) throws -> Data {
         guard let tunnel = state.activeTunnel else { throw GeneratorError.noActiveTunnel }
         let compiled = try RuleCompiler.compile(state.rules)
 

@@ -37,12 +37,12 @@ final class SupervisorTests: XCTestCase {
         return StateStore(directory: d)
     }
 
-    private func state(rule: String, enabled: Bool = true) -> State {
+    private func state(rule: String, enabled: Bool = true) -> AppState {
         let t = Tunnel(name: "n", privateKey: "cHJpdg==", addresses: ["10.0.0.2/32"],
                        dns: ["1.1.1.1"], mtu: nil, peerPublicKey: "cHViCg==",
                        peerPresharedKey: nil, endpointHost: "1.2.3.4",
                        endpointPort: 443, persistentKeepalive: 25)
-        return State(tunnels: [t], rules: [Rule(pattern: rule)],
+        return AppState(tunnels: [t], rules: [Rule(pattern: rule)],
                      activeTunnelID: t.id, enabled: enabled)
     }
 
@@ -106,12 +106,12 @@ final class SupervisorHealthTests: XCTestCase {
         return StateStore(directory: d)
     }
 
-    private func state(enabled: Bool = true) -> State {
+    private func state(enabled: Bool = true) -> AppState {
         let t = Tunnel(name: "n", privateKey: "cHJpdg==", addresses: ["10.0.0.2/32"],
                        dns: ["1.1.1.1"], mtu: nil, peerPublicKey: "cHViCg==",
                        peerPresharedKey: nil, endpointHost: "1.2.3.4",
                        endpointPort: 443, persistentKeepalive: 25)
-        return State(tunnels: [t], rules: [Rule(pattern: "*.niteo.co")],
+        return AppState(tunnels: [t], rules: [Rule(pattern: "*.niteo.co")],
                      activeTunnelID: t.id, enabled: enabled)
     }
 

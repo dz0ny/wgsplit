@@ -15,7 +15,7 @@ final class StateStoreTests: XCTestCase {
 
     func testSaveThenLoadRoundTrips() throws {
         let store = StateStore(directory: try tempDir())
-        let state = State(tunnels: [], rules: [Rule(pattern: "*.niteo.co")],
+        let state = AppState(tunnels: [], rules: [Rule(pattern: "*.niteo.co")],
                           activeTunnelID: nil, enabled: true)
         try store.save(state)
         XCTAssertEqual(store.load(), state)

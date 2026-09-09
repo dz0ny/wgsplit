@@ -20,7 +20,7 @@ final class SingBoxCheckTests: XCTestCase {
                        peerPublicKey: "l4NqMyz/Qw8lFMJfCqBrT00UUoGYPClKlMKDi4OOaUY=",
                        peerPresharedKey: nil, endpointHost: "193.122.15.126",
                        endpointPort: 443, persistentKeepalive: 25)
-        let state = State(tunnels: [t],
+        let state = AppState(tunnels: [t],
                           rules: [Rule(pattern: "*.niteo.co"), Rule(pattern: "*.herokuapp.com")],
                           activeTunnelID: t.id, enabled: true)
 

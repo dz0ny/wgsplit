@@ -2,17 +2,17 @@ import XCTest
 @testable import WGSplitKit
 
 final class ConfigGeneratorTests: XCTestCase {
-    private func makeState(dns: [String] = ["1.1.1.1"]) -> State {
+    private func makeState(dns: [String] = ["1.1.1.1"]) -> AppState {
         let t = Tunnel(name: "Niteo DE", privateKey: "cHJpdg==",
                        addresses: ["10.212.4.7/32"], dns: dns, mtu: nil,
                        peerPublicKey: "cHViCg==", peerPresharedKey: "cHNrCg==",
                        endpointHost: "193.122.15.126", endpointPort: 443,
                        persistentKeepalive: 25)
-        return State(tunnels: [t], rules: [Rule(pattern: "*.niteo.co")],
+        return AppState(tunnels: [t], rules: [Rule(pattern: "*.niteo.co")],
                      activeTunnelID: t.id, enabled: true)
     }
 
-    private func object(_ state: State) throws -> [String: Any] {
+    private func object(_ state: AppState) throws -> [String: Any] {
         let data = try ConfigGenerator.generate(state: state)
         return try JSONSerialization.jsonObject(with: data) as! [String: Any]
     }

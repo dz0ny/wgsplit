@@ -2,13 +2,13 @@ import XCTest
 @testable import WGSplitKit
 
 final class HealthConfigTests: XCTestCase {
-    private func makeState() -> State {
+    private func makeState() -> AppState {
         let t = Tunnel(name: "n", privateKey: "gON0LRZdL1VesfWguWM6O3BQwRyvxw1o/ITJXCMcEUI=",
                        addresses: ["10.212.4.7/32"], dns: ["1.1.1.1"], mtu: nil,
                        peerPublicKey: "l4NqMyz/Qw8lFMJfCqBrT00UUoGYPClKlMKDi4OOaUY=",
                        peerPresharedKey: nil, endpointHost: "193.122.15.126",
                        endpointPort: 443, persistentKeepalive: 25)
-        return State(tunnels: [t], rules: [Rule(pattern: "*.niteo.co")],
+        return AppState(tunnels: [t], rules: [Rule(pattern: "*.niteo.co")],
                      activeTunnelID: t.id, enabled: true)
     }
 

@@ -24,6 +24,11 @@ sudo ./Scripts/install-daemon.sh  # one-time root daemon install
 2. **Edit Domains…** — one pattern per line.
 3. **Start.**
 
+**Start at Login** is in the menu. It uses `SMAppService`, which wants a stably
+located, properly signed bundle — if it refuses, move `WGSplit.app` to
+`/Applications` and toggle it again. The menu shows the real error rather than
+failing quietly.
+
 | Pattern | Matches |
 | --- | --- |
 | `*.niteo.co` | `niteo.co` and every subdomain |
@@ -49,10 +54,27 @@ if it fails. If the new process then dies within 5 seconds, the daemon rolls bac
 the last known-good config. `check` passing is necessary but not sufficient — a
 config can validate and still fail at startup.
 
-## Known limitations
+## Status reporting
 
-- Status reports that sing-box is **running**, not that the tunnel is handshaking.
-  A bad key shows as connected until traffic fails.
+The menu reports three states, sourced from sing-box's clash_api:
+
+| State | Meaning |
+| --- | --- |
+| Stopped | sing-box is not running |
+| Connected — no traffic yet | up, but nothing has gone through the tunnel |
+| Connected — traffic flowing | traffic observed on the `wg-out` outbound |
+
+This is not WireGuard handshake state — sing-box exposes no such query. A wrong
+preshared key sits at "no traffic yet" rather than reporting a fault, so treat that
+state as *absence of evidence*, not proof of a broken tunnel. "Traffic flowing" is
+sticky for the lifetime of one sing-box run so it does not flap back whenever you
+stop browsing.
+
+clash_api is bound to `127.0.0.1` on a random high port with a random secret,
+generated once and persisted `0600` beside `state.json`. Only the daemon reads it;
+it is never exposed over the control socket.
+
+## Known limitations
 - Only sniffable protocols (TLS, HTTP, QUIC) can be routed by name. A raw TCP
   connection to a bare IP has no hostname and falls through to direct.
 - `AllowedIPs` in imported configs is ignored by design; domain rules decide routing.

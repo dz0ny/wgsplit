@@ -8,7 +8,34 @@ final class AppModel: ObservableObject {
 
     private let client = ControlClient()
 
+    @Published var startsAtLogin = LoginItem.isEnabled
+
     var isRunning: Bool { status?.running ?? false }
+
+    /// Filled circle only once traffic has actually gone through the tunnel;
+    /// "running" is deliberately distinguished from "working".
+    var menuBarSymbol: String {
+        switch status?.health ?? .stopped {
+        case .stopped: return "lock.shield"
+        case .running: return "lock.shield.fill"
+        case .active: return "checkmark.shield.fill"
+        }
+    }
+
+    var healthDescription: String {
+        switch status?.health ?? .stopped {
+        case .stopped: return "Stopped"
+        case .running: return "Connected — no traffic yet"
+        case .active: return "Connected — traffic flowing"
+        }
+    }
+
+    func toggleStartAtLogin() {
+        if let problem = LoginItem.setEnabled(!startsAtLogin) {
+            errorMessage = problem
+        }
+        startsAtLogin = LoginItem.isEnabled
+    }
 
     func refresh() { send(.status) }
 

@@ -24,14 +24,14 @@ public struct StateStore: Sendable {
 
     /// Never throws: a corrupt or absent file yields an empty state so the
     /// daemon always starts.
-    public func load() -> State {
+    public func load() -> AppState {
         guard let data = try? Data(contentsOf: stateURL),
-              let state = try? JSONDecoder().decode(State.self, from: data)
+              let state = try? JSONDecoder().decode(AppState.self, from: data)
         else { return .empty }
         return state
     }
 
-    public func save(_ state: State) throws {
+    public func save(_ state: AppState) throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try write(try JSONEncoder().encode(state), to: stateURL)
     }

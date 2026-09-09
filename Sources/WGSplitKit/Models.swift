@@ -29,7 +29,7 @@ public struct Rule: Codable, Equatable, Sendable {
     public init(pattern: String) { self.pattern = pattern }
 }
 
-public struct State: Codable, Equatable, Sendable {
+public struct AppState: Codable, Equatable, Sendable {
     public var tunnels: [Tunnel]
     public var rules: [Rule]
     public var activeTunnelID: UUID?
@@ -40,7 +40,7 @@ public struct State: Codable, Equatable, Sendable {
         self.activeTunnelID = activeTunnelID; self.enabled = enabled
     }
 
-    public static let empty = State(tunnels: [], rules: [], activeTunnelID: nil, enabled: false)
+    public static let empty = AppState(tunnels: [], rules: [], activeTunnelID: nil, enabled: false)
 
     public var activeTunnel: Tunnel? {
         guard let id = activeTunnelID else { return nil }

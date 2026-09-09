@@ -11,18 +11,24 @@ struct WGSplitApp: App {
         MenuBarExtra {
             MenuContent(model: model)
         } label: {
-            Image(systemName: model.isRunning ? "lock.shield.fill" : "lock.shield")
+            Image(systemName: model.menuBarSymbol)
         }
         .menuBarExtraStyle(.menu)
+
+        Window("Routed Domains", id: "domains") {
+            DomainsWindow(model: model)
+        }
+        .windowResizability(.contentSize)
     }
 }
 
 struct MenuContent: View {
     @ObservedObject var model: AppModel
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         if let status = model.status {
-            Text(status.running ? "Connected" : "Stopped")
+            Text(model.healthDescription)
             Button(status.running ? "Stop" : "Start") { model.toggleEnabled() }
             Divider()
             if status.tunnels.isEmpty {
@@ -38,17 +44,27 @@ struct MenuContent: View {
             if status.rules.isEmpty {
                 Text("No routed domains")
             } else {
-                ForEach(status.rules, id: \.pattern) { Text($0.pattern) }
+                ForEach(status.rules.prefix(8), id: \.pattern) { Text($0.pattern) }
+                if status.rules.count > 8 {
+                    Text("+ \(status.rules.count - 8) more")
+                }
             }
         } else {
             Text(model.errorMessage ?? "Connecting…")
         }
 
         Divider()
+        Button("Edit Domains…") {
+            NSApp.activate(ignoringOtherApps: true)
+            openWindow(id: "domains")
+        }
         Button("Import Tunnels from Zip…") { importZip() }
-        Button("Edit Domains…") { editDomains() }
         Button("Refresh") { model.refresh() }
+
         Divider()
+        Button(model.startsAtLogin ? "✓ Start at Login" : "Start at Login") {
+            model.toggleStartAtLogin()
+        }
         Button("Quit") { NSApplication.shared.terminate(nil) }
             .onAppear { model.refresh() }
     }
@@ -59,26 +75,5 @@ struct MenuContent: View {
         panel.allowedContentTypes = [.zip]
         panel.allowsMultipleSelection = false
         if panel.runModal() == .OK, let url = panel.url { model.importZip(at: url) }
-    }
-
-    private func editDomains() {
-        NSApp.activate(ignoringOtherApps: true)
-        let alert = NSAlert()
-        alert.messageText = "Routed domains"
-        alert.informativeText =
-            "One pattern per line. *.niteo.co matches niteo.co and its subdomains."
-        let text = NSTextView(frame: NSRect(x: 0, y: 0, width: 320, height: 120))
-        text.string = (model.status?.rules ?? []).map(\.pattern).joined(separator: "\n")
-        text.isEditable = true
-        let scroll = NSScrollView(frame: text.frame)
-        scroll.documentView = text
-        scroll.hasVerticalScroller = true
-        alert.accessoryView = scroll
-        alert.addButton(withTitle: "Save")
-        alert.addButton(withTitle: "Cancel")
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
-        model.setRules(text.string.split(separator: "\n")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty })
     }
 }

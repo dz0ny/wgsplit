@@ -21,7 +21,7 @@ final class ControlProtocolTests: XCTestCase {
         let tunnel = Tunnel(name: "n", privateKey: "SUPERSECRETKEY", addresses: ["10.0.0.2/32"],
                             dns: [], mtu: nil, peerPublicKey: "p", peerPresharedKey: "PSKSECRET",
                             endpointHost: "h", endpointPort: 1, persistentKeepalive: nil)
-        let state = State(tunnels: [tunnel], rules: [], activeTunnelID: tunnel.id, enabled: false)
+        let state = AppState(tunnels: [tunnel], rules: [], activeTunnelID: tunnel.id, enabled: false)
         let status = Status(state: state, running: false, lastError: nil)
         let json = String(data: try ControlCodec.encode(ControlResponse.status(status)),
                           encoding: .utf8)!

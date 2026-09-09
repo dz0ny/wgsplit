@@ -27,7 +27,7 @@ public struct Status: Codable, Equatable, Sendable {
     public var rules: [Rule]
     public var lastError: String?
 
-    public init(state: State, running: Bool, health: Health = .stopped, lastError: String?) {
+    public init(state: AppState, running: Bool, health: Health = .stopped, lastError: String?) {
         self.running = running
         self.health = health
         self.activeTunnelID = state.activeTunnelID

@@ -55,7 +55,7 @@ public final class Supervisor: @unchecked Sendable {
         return sawTraffic ? .active : .running
     }
 
-    public func apply(_ state: State) throws {
+    public func apply(_ state: AppState) throws {
         try store.save(state)
 
         guard state.enabled, state.activeTunnel != nil else { stop(); return }
