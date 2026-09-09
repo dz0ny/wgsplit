@@ -12,10 +12,22 @@ instead.
 ## Install
 
 ```bash
-./Scripts/vendor-singbox.sh   # pinned sing-box 1.14.0 into Resources/
-./Scripts/bundle.sh
-open dist/WGSplit.app
+make run
 ```
+
+That vendors sing-box, builds, bundles and launches. Use `make run` rather than
+`open dist/WGSplit.app` — `open` will not relaunch an app that is already
+running, so a rebuild silently keeps the old process. `make run` quits it first.
+
+| Target | Does |
+| --- | --- |
+| `make run` | rebuild and relaunch the app |
+| `make build` | build and bundle, no launch |
+| `make install` | install the daemon from the terminal |
+| `make uninstall` | remove the daemon and quit the app |
+| `make status` | daemon, socket and tunnel state |
+| `make logs` | tail the daemon log |
+| `make test` | run the suite |
 
 The app bundle is self-contained. On first launch the menu offers
 **Install Helper…**, which elevates via `osascript` and asks for your password

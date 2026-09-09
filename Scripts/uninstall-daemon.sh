@@ -4,4 +4,5 @@ set -euo pipefail
 launchctl bootout system /Library/LaunchDaemons/co.niteo.wgsplit.plist 2>/dev/null || true
 rm -f /Library/LaunchDaemons/co.niteo.wgsplit.plist
 rm -rf /Library/PrivilegedHelperTools/wgsplit
+rm -f /var/run/wgsplit.sock
 echo "removed. State kept at /Library/Application Support/WGSplit — delete manually if wanted."
