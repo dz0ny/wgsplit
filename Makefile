@@ -28,11 +28,7 @@ build: singbox ## Build everything and assemble WGSplit.app
 	@./Scripts/bundle.sh
 
 .PHONY: dmg
-dmg: build ## Package WGSplit.app into a distributable disk image
-	@./Scripts/make-dmg.sh
-
-.PHONY: dmg
-dmg: build ## Package WGSplit.app into a distributable disk image
+dmg: ## Package the existing dist/WGSplit.app without rebuilding it
 	@./Scripts/make-dmg.sh
 
 .PHONY: notarize
@@ -47,7 +43,7 @@ notarize: dmg ## Submit the disk image to Apple, then staple app and image
 	@xcrun stapler validate $(APP)
 
 .PHONY: release
-release: notarize ## Signed, notarized app and disk image ready to publish
+release: notarize ## Package and notarize the existing signed app in dist
 	@echo "release $(VERSION) ready in dist/"
 
 .PHONY: run

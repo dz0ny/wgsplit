@@ -49,6 +49,9 @@ jobs:
         env:
           TAG: ${{ github.ref_name }}
         run: |
+          make build \
+            VERSION="${TAG#v}" \
+            SIGN_ID="${{ secrets.MACOS_SIGN_ID }}"
           make release \
             VERSION="${TAG#v}" \
             SIGN_ID="${{ secrets.MACOS_SIGN_ID }}" \

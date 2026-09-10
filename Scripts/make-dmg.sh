@@ -3,9 +3,13 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/dist/WGSplit.app"
 DMG="$ROOT/dist/WGSplit.dmg"
+if [ ! -d "$APP" ]; then
+  echo "error: $APP is missing. Copy your signed app to dist/WGSplit.app, or run make build first." >&2
+  exit 1
+fi
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
-cp -R "$APP" "$STAGE/WGSplit.app"
+ditto "$APP" "$STAGE/WGSplit.app"
 ln -s /Applications "$STAGE/Applications"
 rm -f "$DMG"
 hdiutil create -quiet -volname WGSplit -srcfolder "$STAGE" -ov -format UDZO "$DMG"

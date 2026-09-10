@@ -138,11 +138,16 @@ That vendors sing-box, builds, bundles, and launches. Use `make run` rather than
 `open dist/WGSplit.app` — `open` will not relaunch an app that is already
 running, so a rebuild silently keeps the old process. `make run` quits it first.
 
-To hand the app to someone else, build a disk image:
+To create a disk image, put the prepared app at `dist/WGSplit.app`, then run:
 
 ```bash
 make dmg
 ```
+
+This command packages the existing app. It does not build or sign the app again,
+so its signature and stapled notarization ticket are preserved. If you need a
+new app build, run `make build` separately. Set `SIGN_ID` when you also want to
+sign the disk image.
 
 For a source build, install the helper through the app with the same steps.
 Move `WGSplit.app` to `/Applications` before you enable **Start at Login**.
@@ -151,8 +156,8 @@ Move `WGSplit.app` to `/Applications` before you enable **Start at Login**.
 |---|---|
 | `make run` | rebuild and relaunch the app |
 | `make build` | build and bundle, no launch |
-| `make dmg` | package the bundle into `dist/WGSplit.dmg` |
-| `make release` | signed, notarized, stapled app and disk image |
+| `make dmg` | package the existing `dist/WGSplit.app` without rebuilding it |
+| `make release` | package and notarize the existing signed app in `dist` |
 | `make uninstall` | remove the daemon and quit the app |
 | `make status` | daemon, socket and tunnel state |
 | `make logs` | tail the daemon log |
@@ -290,7 +295,14 @@ It prompts for each value, base64-encodes the certificate for you, and pipes
 everything to `gh secret set` without writing anything to disk. Values already
 exported in the environment are used as-is, so a password manager can drive it.
 
-The same thing runs locally:
+For a local release, first build and sign the app, or copy your signed Xcode
+export to `dist/WGSplit.app`. To build from the command line:
+
+```bash
+make build SIGN_ID="Developer ID Application: NAME (TEAMID)"
+```
+
+Then package and notarize the prepared app:
 
 ```bash
 make release SIGN_ID="Developer ID Application: NAME (TEAMID)" \
