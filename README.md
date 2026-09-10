@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Resources/AppIcon.png" alt="wgsplit app icon" width="160" height="160" />
+</p>
+
 <h1 align="center">wgsplit</h1>
 
 <p align="center">
@@ -30,7 +34,8 @@ off each connection and routes on the hostname instead.
 - Estimated sent and received bytes since the tunnel started
 - Validated configuration with automatic rollback if a new config fails to start
 - Root daemon that accepts declarative intent only — never a config or a path
-- Start at Login via `SMAppService`, installed from the app with one password prompt
+- Install the helper from the app with an administrator password
+- Start at Login via `SMAppService`
 - In-app updates from GitHub Releases, gated on a matching Developer ID signature
 
 ## Feature Overview
@@ -46,6 +51,28 @@ off each connection and routes on the hostname instead.
 | Install | In-app helper installation with the standard macOS password dialog |
 | Startup | Start at Login, when the bundle lives in `/Applications` |
 | Updates | Background release check and one-click Install and Relaunch |
+
+## Settings
+
+These screenshots show the app settings with example tunnel and domain data.
+
+### General
+
+Set startup options, check the connection, and manage app updates.
+
+<img src="docs/images/settings-general.png" alt="General settings with startup, connection status, and app updates" width="520" />
+
+### Tunnels
+
+Import WireGuard configurations and select the active tunnel.
+
+<img src="docs/images/settings-tunnels.png" alt="Tunnel settings with an example active tunnel and the Import Tunnels button" width="520" />
+
+### Routes
+
+Add the domains that must use the tunnel. Other traffic uses the direct connection.
+
+<img src="docs/images/settings-routes.png" alt="Route settings with example domain rules and controls to add, save, or revert changes" width="520" />
 
 ## How It Works
 
@@ -72,22 +99,32 @@ sufficient — a config can validate and still fail at startup.
 
 ## Requirements
 
-- macOS with an administrator account
+- macOS 14 or later with an administrator account
 - A WireGuard configuration export (a ZIP of `.conf` files)
 - Xcode command line tools, to build from source
 
 ## Install
 
 Check [Releases](https://github.com/dz0ny/wgsplit/releases) for a signed
-`WGSplit.dmg`. Open the disk image and move `WGSplit.app` to Applications.
+`WGSplit.dmg`.
+
+1. Open the disk image and move `WGSplit.app` to `/Applications`.
+2. Open the app. Select its shield icon in the menu bar, then **Settings…**.
+3. In **General → Connection**, select **Install Helper…**.
+4. Enter an administrator password in the macOS dialog.
+
+The app installs and starts the daemon (`wgsplitd`) and its tunnel engine.
+No terminal command is required. The installation button appears when the app
+cannot connect to the helper. If a helper is already connected, continue with
+[First Run](#first-run).
 
 Once installed, wgsplit keeps itself up to date: it checks Releases at launch,
 verifies a downloaded update is signed by the same Developer ID before
 installing it, and offers **Install and Relaunch** in **Settings → General →
 Updates** (toggle the automatic check off there if you prefer). An update
 replaces the app only — the root helper keeps running the version installed in
-`/Library/PrivilegedHelperTools/wgsplit/`, so reinstall the helper from
-Settings after an update that changes the daemon.
+`/Library/PrivilegedHelperTools/wgsplit/`. If the app cannot connect to the helper
+after an update, use **Settings → General → Connection → Install Helper…**.
 
 If no signed release is listed, build the current version:
 
@@ -107,8 +144,8 @@ To hand the app to someone else, build a disk image:
 make dmg
 ```
 
-Move `WGSplit.app` to `/Applications` before installing the helper if you want
-Start at Login to stick — `SMAppService` wants a stable location.
+For a source build, install the helper through the app with the same steps.
+Move `WGSplit.app` to `/Applications` before you enable **Start at Login**.
 
 | Target | Does |
 |---|---|
@@ -116,7 +153,6 @@ Start at Login to stick — `SMAppService` wants a stable location.
 | `make build` | build and bundle, no launch |
 | `make dmg` | package the bundle into `dist/WGSplit.dmg` |
 | `make release` | signed, notarized, stapled app and disk image |
-| `make install` | install the daemon from the terminal |
 | `make uninstall` | remove the daemon and quit the app |
 | `make status` | daemon, socket and tunnel state |
 | `make logs` | tail the daemon log |
@@ -125,12 +161,13 @@ Start at Login to stick — `SMAppService` wants a stable location.
 ## First Run
 
 1. Open **Settings…** from the menu, or press **Command-comma**.
-2. In **General**, choose **Install Helper…** and enter your password.
+2. If **General → Connection** shows **Install Helper…**, select it and enter
+   an administrator password. If the helper is connected, continue to step 3.
 3. In **Tunnels**, choose **Import Tunnels…**, pick a WireGuard export ZIP, and
    select the active tunnel.
 4. In **Routes**, add domain patterns and select **Save**. **Revert** discards
    unsaved changes.
-5. Select **Start** from the menu.
+5. Select **Start Tunnel** from the menu.
 
 Helper installation elevates via `osascript` and asks for your password in the
 standard macOS dialog — no terminal needed. It copies `wgsplitd` and `sing-box`
@@ -138,12 +175,6 @@ to root-owned `/Library/PrivilegedHelperTools/wgsplit/` and loads the
 LaunchDaemon. The daemon deliberately runs from that copy, never from inside the
 app bundle: root executing a binary in a user-writable location would be a
 privilege-escalation path.
-
-The same script still works from a checkout:
-
-```bash
-swift build -c release && sudo ./Scripts/install-daemon.sh
-```
 
 ## Route Patterns
 
@@ -224,8 +255,9 @@ swift test                    # full suite
 `SingBoxCheckTests` pipes generated config through the real pinned binary. It is
 the test that catches a sing-box upgrade breaking the config schema.
 
-Local builds take their version from `git describe`, so an untagged checkout has
-no parseable version and never offers itself an update.
+Command-line builds take their version from `git describe`. Builds with a
+version that cannot be parsed do not offer updates. Xcode builds use the version
+and build number in the app target.
 
 ## Publishing a Release
 
