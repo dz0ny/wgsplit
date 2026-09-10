@@ -10,6 +10,7 @@ swift build -c release
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$ROOT/.build/release/WGSplitApp" "$APP/Contents/MacOS/WGSplitApp"
+cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 sed "s/__VERSION__/${VERSION#v}/g" "$ROOT/Scripts/Info.plist" > "$APP/Contents/Info.plist"
 # Ship everything the in-app installer needs, so the bundle is self-contained
 # and can live in /Applications (which SMAppService also wants).

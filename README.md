@@ -201,6 +201,21 @@ unavailable".
 
 ## Development
 
+### Xcode
+
+Open `WGSplit.xcodeproj` to build and configure the macOS app. Opening
+`Package.swift` only shows the Swift package and does not provide app signing settings.
+
+1. Run `make singbox` once to download the required engine.
+2. Open `WGSplit.xcodeproj` and select the **WGSplit** scheme.
+3. Select the **WGSplit** target, then **Signing & Capabilities**.
+4. Select your development team. Set the same team on the **wgsplitd** target.
+5. Select **My Mac**, then build or run. Use **Product → Archive** for distribution.
+
+The project builds the library and daemon, adds the app icon and helper files,
+and signs the app with the selected settings. Set the release version and build
+number in the app target before an archive. Tests remain available through `swift test`.
+
 ```bash
 swift test                    # full suite
 ./Scripts/vendor-singbox.sh   # required for SingBoxCheckTests

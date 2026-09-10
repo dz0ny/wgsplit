@@ -1,6 +1,7 @@
 .build/
 .swiftpm/
-*.xcodeproj
+xcuserdata/
+*.xcuserstate
 DerivedData/
 dist/
 Resources/sing-box

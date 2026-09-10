@@ -1,0 +1,609 @@
+// !$*UTF8*$!
+{
+"archiveVersion" = "1";
+"classes" = {
+};
+"objectVersion" = "56";
+"objects" = {
+"8669B0D84834957DEA449E03" = {
+"isa" = "PBXFileReference";
+"explicitFileType" = "archive.ar";
+"path" = "libWGSplitKit.a";
+"sourceTree" = "BUILT_PRODUCTS_DIR";
+};
+"5DA8AF1D11D705E04A896F19" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/ClashClient.swift";
+"sourceTree" = "<group>";
+};
+"BC76859A6E73D91F1DC7D552" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "5DA8AF1D11D705E04A896F19";
+};
+"C14193DFD185ECE03DFE1EF8" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/ConfigGenerator.swift";
+"sourceTree" = "<group>";
+};
+"3860883096B0CF9AF9E883E8" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "C14193DFD185ECE03DFE1EF8";
+};
+"969E728FC8ED0F223FA5B2EB" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/ControlClient.swift";
+"sourceTree" = "<group>";
+};
+"41DE263DAB53BD3FA3BA03B5" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "969E728FC8ED0F223FA5B2EB";
+};
+"8167AFCA812DDC8456E09917" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/ControlProtocol.swift";
+"sourceTree" = "<group>";
+};
+"02FB6085E4B627BC002F54B2" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "8167AFCA812DDC8456E09917";
+};
+"255EF0FF9E7BD30D67ABE121" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/Health.swift";
+"sourceTree" = "<group>";
+};
+"3A261B06C50D0B862869395F" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "255EF0FF9E7BD30D67ABE121";
+};
+"6438C620D2D7653308A89E3B" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/Models.swift";
+"sourceTree" = "<group>";
+};
+"D940401B67759DE343B15143" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "6438C620D2D7653308A89E3B";
+};
+"902C0F1DDD811E26A400F47A" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/OrphanReaper.swift";
+"sourceTree" = "<group>";
+};
+"C145835F545965E12ECF51EE" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "902C0F1DDD811E26A400F47A";
+};
+"9C14B40039F93978AD4BE7F0" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/ProcessRunner.swift";
+"sourceTree" = "<group>";
+};
+"686010B3C230CECFD7213BCA" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "9C14B40039F93978AD4BE7F0";
+};
+"E0C9C8685D34C719F543B46E" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/RuleCompiler.swift";
+"sourceTree" = "<group>";
+};
+"C6E9BD37A7B664F190CB79F4" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "E0C9C8685D34C719F543B46E";
+};
+"079FD9539B8A6DB68B5066B3" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/SocketServer.swift";
+"sourceTree" = "<group>";
+};
+"E616A82E455F4D2B33FC7499" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "079FD9539B8A6DB68B5066B3";
+};
+"925735650E569C821C88C650" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/StateStore.swift";
+"sourceTree" = "<group>";
+};
+"BA333AE7C3058DBC94F90A90" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "925735650E569C821C88C650";
+};
+"C3D4652D05EEA2E98247EC4F" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/Supervisor.swift";
+"sourceTree" = "<group>";
+};
+"88AC2901B80C3851DC56D21F" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "C3D4652D05EEA2E98247EC4F";
+};
+"C2833E8380EE87434469F770" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/TunnelImporter.swift";
+"sourceTree" = "<group>";
+};
+"5EA14BF7D99805AC874B9BBA" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "C2833E8380EE87434469F770";
+};
+"BD9D33F2BB744675A898294F" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/TunnelTraffic.swift";
+"sourceTree" = "<group>";
+};
+"28C0707241B7947EB635530D" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "BD9D33F2BB744675A898294F";
+};
+"C749228A2381D39CA6EBC254" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/UnixSocket.swift";
+"sourceTree" = "<group>";
+};
+"04B1BAD33DF29791B80B43CD" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "C749228A2381D39CA6EBC254";
+};
+"E3063FDF9544ED16563D9D4F" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/WGQuickParser.swift";
+"sourceTree" = "<group>";
+};
+"CCF8738F9E4ED2E6D2719A73" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "E3063FDF9544ED16563D9D4F";
+};
+"675EF739410071020D8C1958" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitKit/ZipReader.swift";
+"sourceTree" = "<group>";
+};
+"5A9A5E0A1AA8BFF2B0289F0E" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "675EF739410071020D8C1958";
+};
+"B45310C724D3531E13870AB0" = {
+"isa" = "PBXSourcesBuildPhase";
+"buildActionMask" = "2147483647";
+"files" = ("BC76859A6E73D91F1DC7D552","3860883096B0CF9AF9E883E8","41DE263DAB53BD3FA3BA03B5","02FB6085E4B627BC002F54B2","3A261B06C50D0B862869395F","D940401B67759DE343B15143","C145835F545965E12ECF51EE","686010B3C230CECFD7213BCA","C6E9BD37A7B664F190CB79F4","E616A82E455F4D2B33FC7499","BA333AE7C3058DBC94F90A90","88AC2901B80C3851DC56D21F","5EA14BF7D99805AC874B9BBA","28C0707241B7947EB635530D","04B1BAD33DF29791B80B43CD","CCF8738F9E4ED2E6D2719A73","5A9A5E0A1AA8BFF2B0289F0E",);
+"runOnlyForDeploymentPostprocessing" = "0";
+};
+"DBAF735552ED556F3A28FD4B" = {
+"isa" = "PBXFrameworksBuildPhase";
+"buildActionMask" = "2147483647";
+"files" = ();
+"runOnlyForDeploymentPostprocessing" = "0";
+};
+"3B958F5CA51CEF5C510B5DD5" = {
+"isa" = "XCBuildConfiguration";
+"buildSettings" = {
+"PRODUCT_NAME" = "WGSplitKit";
+"SWIFT_VERSION" = "5.0";
+"CODE_SIGN_STYLE" = "Automatic";
+"ENABLE_HARDENED_RUNTIME" = "YES";
+"SKIP_INSTALL" = "YES";
+"DEFINES_MODULE" = "YES";
+"PRODUCT_MODULE_NAME" = "WGSplitKit";
+"CODE_SIGNING_ALLOWED" = "NO";
+"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+"DEBUG_INFORMATION_FORMAT" = "dwarf";
+"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+};
+"name" = "Debug";
+};
+"9954F718AC50805ECDE46088" = {
+"isa" = "XCBuildConfiguration";
+"buildSettings" = {
+"PRODUCT_NAME" = "WGSplitKit";
+"SWIFT_VERSION" = "5.0";
+"CODE_SIGN_STYLE" = "Automatic";
+"ENABLE_HARDENED_RUNTIME" = "YES";
+"SKIP_INSTALL" = "YES";
+"DEFINES_MODULE" = "YES";
+"PRODUCT_MODULE_NAME" = "WGSplitKit";
+"CODE_SIGNING_ALLOWED" = "NO";
+"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+};
+"name" = "Release";
+};
+"B98097FBDEDF11E913195B07" = {
+"isa" = "XCConfigurationList";
+"buildConfigurations" = ("3B958F5CA51CEF5C510B5DD5","9954F718AC50805ECDE46088",);
+"defaultConfigurationIsVisible" = "0";
+"defaultConfigurationName" = "Release";
+};
+"AF8242E763F0C8A9EF50E016" = {
+"isa" = "PBXNativeTarget";
+"buildConfigurationList" = "B98097FBDEDF11E913195B07";
+"buildPhases" = ("B45310C724D3531E13870AB0","DBAF735552ED556F3A28FD4B",);
+"buildRules" = ();
+"dependencies" = ();
+"name" = "WGSplitKit";
+"productName" = "WGSplitKit";
+"productReference" = "8669B0D84834957DEA449E03";
+"productType" = "com.apple.product-type.library.static";
+};
+"49355010A52A4C62E8A815C0" = {
+"isa" = "PBXFileReference";
+"explicitFileType" = "compiled.mach-o.executable";
+"path" = "wgsplitd";
+"sourceTree" = "BUILT_PRODUCTS_DIR";
+};
+"7A6DC627C9FF8837F64A0D88" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/wgsplitd/main.swift";
+"sourceTree" = "<group>";
+};
+"B64DD6D00B18439C63FDA3D6" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "7A6DC627C9FF8837F64A0D88";
+};
+"1B8325263180C2C1BC5A8519" = {
+"isa" = "PBXSourcesBuildPhase";
+"buildActionMask" = "2147483647";
+"files" = ("B64DD6D00B18439C63FDA3D6",);
+"runOnlyForDeploymentPostprocessing" = "0";
+};
+"D9081BF4637E39E9C9DBF27F" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "8669B0D84834957DEA449E03";
+};
+"CB916D45E160F7A185E14CA4" = {
+"isa" = "PBXTargetDependency";
+"target" = "AF8242E763F0C8A9EF50E016";
+};
+"037237A2505FC4A7CEAAA622" = {
+"isa" = "PBXFrameworksBuildPhase";
+"buildActionMask" = "2147483647";
+"files" = ("D9081BF4637E39E9C9DBF27F",);
+"runOnlyForDeploymentPostprocessing" = "0";
+};
+"BE521A269414523E193A796A" = {
+"isa" = "XCBuildConfiguration";
+"buildSettings" = {
+"PRODUCT_NAME" = "wgsplitd";
+"SWIFT_VERSION" = "5.0";
+"CODE_SIGN_STYLE" = "Automatic";
+"ENABLE_HARDENED_RUNTIME" = "YES";
+"SKIP_INSTALL" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+"DEBUG_INFORMATION_FORMAT" = "dwarf";
+"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+};
+"name" = "Debug";
+};
+"6782238DA4130751B101D282" = {
+"isa" = "XCBuildConfiguration";
+"buildSettings" = {
+"PRODUCT_NAME" = "wgsplitd";
+"SWIFT_VERSION" = "5.0";
+"CODE_SIGN_STYLE" = "Automatic";
+"ENABLE_HARDENED_RUNTIME" = "YES";
+"SKIP_INSTALL" = "YES";
+"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+};
+"name" = "Release";
+};
+"56E6B448D93705F3AA2558D9" = {
+"isa" = "XCConfigurationList";
+"buildConfigurations" = ("BE521A269414523E193A796A","6782238DA4130751B101D282",);
+"defaultConfigurationIsVisible" = "0";
+"defaultConfigurationName" = "Release";
+};
+"C40AF78FDF1AC039F0F3B287" = {
+"isa" = "PBXNativeTarget";
+"buildConfigurationList" = "56E6B448D93705F3AA2558D9";
+"buildPhases" = ("1B8325263180C2C1BC5A8519","037237A2505FC4A7CEAAA622",);
+"buildRules" = ();
+"dependencies" = ("CB916D45E160F7A185E14CA4",);
+"name" = "wgsplitd";
+"productName" = "wgsplitd";
+"productReference" = "49355010A52A4C62E8A815C0";
+"productType" = "com.apple.product-type.tool";
+};
+"124B13AD3D7903F42D5B663C" = {
+"isa" = "PBXFileReference";
+"explicitFileType" = "wrapper.application";
+"path" = "WGSplit.app";
+"sourceTree" = "BUILT_PRODUCTS_DIR";
+};
+"3A5D7F2B450022A3C8A7D267" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitApp/AppModel.swift";
+"sourceTree" = "<group>";
+};
+"ACC5CA0702684643CD65AB82" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "3A5D7F2B450022A3C8A7D267";
+};
+"FB0FCF75137FADC3F0F872E8" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitApp/DaemonInstaller.swift";
+"sourceTree" = "<group>";
+};
+"017492BBD2A48BCCF154032A" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "FB0FCF75137FADC3F0F872E8";
+};
+"7414624399E8D8C84ED8FF4C" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitApp/LoginItem.swift";
+"sourceTree" = "<group>";
+};
+"64068FC0AD596D6CE68E7BCB" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "7414624399E8D8C84ED8FF4C";
+};
+"8E0D0E7F07C4B6F06EB178CA" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitApp/RoutesSettings.swift";
+"sourceTree" = "<group>";
+};
+"E396D52B03955F8CB42C20DC" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "8E0D0E7F07C4B6F06EB178CA";
+};
+"BBDFA4586FC274FDA3D06515" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitApp/SelfUpdater.swift";
+"sourceTree" = "<group>";
+};
+"70ACDE933AF4B3CDC48F628A" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "BBDFA4586FC274FDA3D06515";
+};
+"95484BD9FFFED471A0B44D88" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitApp/SettingsView.swift";
+"sourceTree" = "<group>";
+};
+"2E03A13BFA2F63C70449BE03" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "95484BD9FFFED471A0B44D88";
+};
+"9575E6C0AD7EFFA46ECB5DB4" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "sourcecode.swift";
+"path" = "Sources/WGSplitApp/WGSplitApp.swift";
+"sourceTree" = "<group>";
+};
+"AA52CE4F352003225D15303F" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "9575E6C0AD7EFFA46ECB5DB4";
+};
+"8A6DC9A83957DD5571713769" = {
+"isa" = "PBXSourcesBuildPhase";
+"buildActionMask" = "2147483647";
+"files" = ("ACC5CA0702684643CD65AB82","017492BBD2A48BCCF154032A","64068FC0AD596D6CE68E7BCB","E396D52B03955F8CB42C20DC","70ACDE933AF4B3CDC48F628A","2E03A13BFA2F63C70449BE03","AA52CE4F352003225D15303F",);
+"runOnlyForDeploymentPostprocessing" = "0";
+};
+"705E8441925ED71C13DFECDF" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "8669B0D84834957DEA449E03";
+};
+"1CAA28A899F20442B9BC1209" = {
+"isa" = "PBXTargetDependency";
+"target" = "AF8242E763F0C8A9EF50E016";
+};
+"9ED129ABD084016659612389" = {
+"isa" = "PBXFrameworksBuildPhase";
+"buildActionMask" = "2147483647";
+"files" = ("705E8441925ED71C13DFECDF",);
+"runOnlyForDeploymentPostprocessing" = "0";
+};
+"4545F5318A0046043187F2EB" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "folder.assetcatalog";
+"path" = "Resources/Assets.xcassets";
+"sourceTree" = "<group>";
+};
+"9DBDD6B471C2805D675DA34D" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "4545F5318A0046043187F2EB";
+};
+"A84E4FAF382D61847C0D3963" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "text.script.sh";
+"path" = "Scripts/install-daemon.sh";
+"sourceTree" = "<group>";
+};
+"31BD9D9CDC334BBD6E3471D5" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "A84E4FAF382D61847C0D3963";
+};
+"0988E0B68FE2A1E7EBE222FA" = {
+"isa" = "PBXFileReference";
+"lastKnownFileType" = "text.plist.xml";
+"path" = "Scripts/co.niteo.wgsplit.plist";
+"sourceTree" = "<group>";
+};
+"64B692C9C63585DC30324CEF" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "0988E0B68FE2A1E7EBE222FA";
+};
+"0189424A5A60FED329FA868E" = {
+"isa" = "PBXResourcesBuildPhase";
+"buildActionMask" = "2147483647";
+"files" = ("9DBDD6B471C2805D675DA34D","31BD9D9CDC334BBD6E3471D5","64B692C9C63585DC30324CEF",);
+"runOnlyForDeploymentPostprocessing" = "0";
+};
+"B5DCAFD75EC924A7A5000201" = {
+"isa" = "PBXTargetDependency";
+"target" = "C40AF78FDF1AC039F0F3B287";
+};
+"87157F6B91C52C94795470D4" = {
+"isa" = "PBXBuildFile";
+"fileRef" = "49355010A52A4C62E8A815C0";
+};
+"99BAE1AA52D937ADFE62F405" = {
+"isa" = "PBXCopyFilesBuildPhase";
+"buildActionMask" = "2147483647";
+"dstPath" = "";
+"dstSubfolderSpec" = "7";
+"files" = ("87157F6B91C52C94795470D4",);
+"name" = "Embed Daemon";
+"runOnlyForDeploymentPostprocessing" = "0";
+};
+"C64033672F5CA984DFE96290" = {
+"isa" = "PBXShellScriptBuildPhase";
+"buildActionMask" = "2147483647";
+"files" = ();
+"inputPaths" = ("$(SRCROOT)/Resources/sing-box",);
+"outputPaths" = ("$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/sing-box",);
+"name" = "Embed and Sign Engine";
+"shellPath" = "/bin/bash";
+"shellScript" = "set -euo pipefail\nengine=\"$SRCROOT/Resources/sing-box\"\nif [ ! -x \"$engine\" ]; then\n  echo \"error: Run make singbox in the project folder before building.\"\n  exit 1\nfi\ndest=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/sing-box\"\ncp \"$engine\" \"$dest\"\nchmod u+w \"$dest\"\nif [ \"${CODE_SIGNING_ALLOWED:-YES}\" != \"NO\" ]; then\n  /usr/bin/codesign --force --options runtime --sign \"${EXPANDED_CODE_SIGN_IDENTITY:--}\" \"$dest\"\nfi\n";
+"runOnlyForDeploymentPostprocessing" = "0";
+};
+"1AF991506683C1B1B4F00F71" = {
+"isa" = "XCBuildConfiguration";
+"buildSettings" = {
+"PRODUCT_NAME" = "WGSplit";
+"SWIFT_VERSION" = "5.0";
+"CODE_SIGN_STYLE" = "Automatic";
+"ENABLE_HARDENED_RUNTIME" = "YES";
+"SKIP_INSTALL" = "NO";
+"PRODUCT_BUNDLE_IDENTIFIER" = "co.niteo.wgsplit.app";
+"GENERATE_INFOPLIST_FILE" = "YES";
+"INFOPLIST_KEY_CFBundleDisplayName" = "WGSplit";
+"INFOPLIST_KEY_LSUIElement" = "YES";
+"MARKETING_VERSION" = "0.1.0";
+"CURRENT_PROJECT_VERSION" = "1";
+"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
+"ENABLE_APP_SANDBOX" = "NO";
+"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+"DEBUG_INFORMATION_FORMAT" = "dwarf";
+"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+};
+"name" = "Debug";
+};
+"890A5F3C054A18EC3483C473" = {
+"isa" = "XCBuildConfiguration";
+"buildSettings" = {
+"PRODUCT_NAME" = "WGSplit";
+"SWIFT_VERSION" = "5.0";
+"CODE_SIGN_STYLE" = "Automatic";
+"ENABLE_HARDENED_RUNTIME" = "YES";
+"SKIP_INSTALL" = "NO";
+"PRODUCT_BUNDLE_IDENTIFIER" = "co.niteo.wgsplit.app";
+"GENERATE_INFOPLIST_FILE" = "YES";
+"INFOPLIST_KEY_CFBundleDisplayName" = "WGSplit";
+"INFOPLIST_KEY_LSUIElement" = "YES";
+"MARKETING_VERSION" = "0.1.0";
+"CURRENT_PROJECT_VERSION" = "1";
+"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
+"ENABLE_APP_SANDBOX" = "NO";
+"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+};
+"name" = "Release";
+};
+"0E539F7D471B66BAB20DB554" = {
+"isa" = "XCConfigurationList";
+"buildConfigurations" = ("1AF991506683C1B1B4F00F71","890A5F3C054A18EC3483C473",);
+"defaultConfigurationIsVisible" = "0";
+"defaultConfigurationName" = "Release";
+};
+"2A98276000EDE09E955D3B10" = {
+"isa" = "PBXNativeTarget";
+"buildConfigurationList" = "0E539F7D471B66BAB20DB554";
+"buildPhases" = ("8A6DC9A83957DD5571713769","9ED129ABD084016659612389","0189424A5A60FED329FA868E","99BAE1AA52D937ADFE62F405","C64033672F5CA984DFE96290",);
+"buildRules" = ();
+"dependencies" = ("1CAA28A899F20442B9BC1209","B5DCAFD75EC924A7A5000201",);
+"name" = "WGSplit";
+"productName" = "WGSplit";
+"productReference" = "124B13AD3D7903F42D5B663C";
+"productType" = "com.apple.product-type.application";
+};
+"FBDC4F23F93125BBEEAE800C" = {
+"isa" = "PBXGroup";
+"children" = ("8669B0D84834957DEA449E03","49355010A52A4C62E8A815C0","124B13AD3D7903F42D5B663C",);
+"name" = "Products";
+"sourceTree" = "<group>";
+};
+"B28B7AF69320201D1CF206EB" = {
+"isa" = "PBXGroup";
+"children" = ("5DA8AF1D11D705E04A896F19","C14193DFD185ECE03DFE1EF8","969E728FC8ED0F223FA5B2EB","8167AFCA812DDC8456E09917","255EF0FF9E7BD30D67ABE121","6438C620D2D7653308A89E3B","902C0F1DDD811E26A400F47A","9C14B40039F93978AD4BE7F0","E0C9C8685D34C719F543B46E","079FD9539B8A6DB68B5066B3","925735650E569C821C88C650","C3D4652D05EEA2E98247EC4F","C2833E8380EE87434469F770","BD9D33F2BB744675A898294F","C749228A2381D39CA6EBC254","E3063FDF9544ED16563D9D4F","675EF739410071020D8C1958","7A6DC627C9FF8837F64A0D88","3A5D7F2B450022A3C8A7D267","FB0FCF75137FADC3F0F872E8","7414624399E8D8C84ED8FF4C","8E0D0E7F07C4B6F06EB178CA","BBDFA4586FC274FDA3D06515","95484BD9FFFED471A0B44D88","9575E6C0AD7EFFA46ECB5DB4","4545F5318A0046043187F2EB","A84E4FAF382D61847C0D3963","0988E0B68FE2A1E7EBE222FA","FBDC4F23F93125BBEEAE800C",);
+"sourceTree" = "<group>";
+};
+"89E1FD6268CC0F221A2BE178" = {
+"isa" = "XCBuildConfiguration";
+"buildSettings" = {
+"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+"SDKROOT" = "macosx";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_VERSION" = "5.0";
+"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+"DEBUG_INFORMATION_FORMAT" = "dwarf";
+"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+};
+"name" = "Debug";
+};
+"E6DE6C99132752C914FEF632" = {
+"isa" = "XCBuildConfiguration";
+"buildSettings" = {
+"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+"SDKROOT" = "macosx";
+"CLANG_ENABLE_MODULES" = "YES";
+"SWIFT_VERSION" = "5.0";
+"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+};
+"name" = "Release";
+};
+"862894B703A6DEDF96A9DD6C" = {
+"isa" = "XCConfigurationList";
+"buildConfigurations" = ("89E1FD6268CC0F221A2BE178","E6DE6C99132752C914FEF632",);
+"defaultConfigurationIsVisible" = "0";
+"defaultConfigurationName" = "Release";
+};
+"98F54143AB4E86B28C3AFEE0" = {
+"isa" = "PBXProject";
+"attributes" = {
+"BuildIndependentTargetsInParallel" = "YES";
+"LastUpgradeCheck" = "1600";
+};
+"buildConfigurationList" = "862894B703A6DEDF96A9DD6C";
+"compatibilityVersion" = "Xcode 14.0";
+"developmentRegion" = "en";
+"hasScannedForEncodings" = "0";
+"knownRegions" = ("en","Base",);
+"mainGroup" = "B28B7AF69320201D1CF206EB";
+"productRefGroup" = "FBDC4F23F93125BBEEAE800C";
+"projectDirPath" = "";
+"projectRoot" = "";
+"targets" = ("AF8242E763F0C8A9EF50E016","C40AF78FDF1AC039F0F3B287","2A98276000EDE09E955D3B10",);
+};
+};
+"rootObject" = "98F54143AB4E86B28C3AFEE0";
+}
